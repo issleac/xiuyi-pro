@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package turtle.v1;
+
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+
+option go_package = "xiuyiPro/api/turtle/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.turtle.v1";
+option java_outer_classname = "TurtleProtoV1";
+
+service turtle {
+  // 批量写入谜题
+  rpc SetTurtleBatch (SetTurtleBatchReq) returns (SetTurtleBatchResp) {
+    option (google.api.http) = {
+      post: "/set/turtle/batch"
+    };
+  }
+  // 分页读取谜题
+  rpc GetTurtleList (GetTurtleListReq) returns (GetTurtleListResp) {
+    option (google.api.http) = {
+      get: "/get/turtle/list"
+    };
+  }
+}
+
+message GetTurtleListReq {
+  // 分页参数
+  int32 page = 1;
+  int32 pageSize = 2;
+  // 状态
+  Turtle.State state = 3;
+  // 分类
+  Turtle.Category category = 4;
+}
+
+message GetTurtleListResp {
+  repeated Turtle turtles = 1;
+}
+
+// The request message containing the user's name.
+message SetTurtleBatchReq {
+  repeated Turtle turtles = 1;
+}
+
+message Turtle {
+  enum State {
+    // 未知状态
+    INVALID = 0;
+    // 审核中
+    AUDITING = 1;
+    // 已上线
+    ONLINE = 2;
+    // 已下线
+    OFFLINE = 3;
+  }
+  enum Category {
+    // 未知分类
+    UNKNOWN = 0;
+    // 恐怖
+    HORROR = 1;
+    // 推理
+    DETECTIVE = 2;
+    // 搞笑
+    FUNNY = 3;
+    // 其他
+    CUSTOM = 100;
+  }
+  // 唯一标识（例：HT_001）
+  string qid = 1;
+  // 谜题标题（例：“深夜弹珠声”）
+  string title = 2 [(validate.rules).string = {min_len: 1}];
+  // 谜题完整描述
+  string content = 3 [(validate.rules).string = {min_len: 1}];
+  // 标准答案
+  string answer = 4 [(validate.rules).string = {min_len: 1}];
+  // 分类（恐怖/推理/搞笑/其他）
+  Category  category = 5 [(validate.rules).enum = {defined_only: true}];
+  // 创建者（主播UID或观众UID）
+  string creator = 6 [(validate.rules).string = {min_len: 1}];
+  // 状态（审核中/已上线/已删除）
+  State state = 7;
+}
+
+message SetTurtleBatchResp {
+}
