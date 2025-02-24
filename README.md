@@ -1,4 +1,7 @@
-# Kratos Project Template
+# XiuyiPro
+
+## Version
+>1. 初始化项目
 
 ## Install Kratos
 ```
