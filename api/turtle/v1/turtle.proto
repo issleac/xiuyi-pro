@@ -2,8 +2,10 @@ syntax = "proto3";
 
 package turtle.v1;
 
+import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "validate/validate.proto";
+import "google/protobuf/descriptor.proto";
 
 option go_package = "xiuyiPro/api/turtle/v1;v1";
 option java_multiple_files = true;
@@ -12,31 +14,57 @@ option java_outer_classname = "TurtleProtoV1";
 
 service turtle {
   // 批量写入谜题
-  rpc SetTurtleBatch (SetTurtleBatchReq) returns (SetTurtleBatchResp) {
-    option (google.api.http) = {
-      post: "/set/turtle/batch"
-    };
-  }
+  rpc SetTurtleBatch (SetTurtleBatchReq) returns (.google.protobuf.Empty) {}
   // 分页读取谜题
-  rpc GetTurtleList (GetTurtleListReq) returns (GetTurtleListResp) {
+  rpc GetTurtleList (GetTurtleListReq) returns (GetTurtleListResp) {}
+  // 开启互玩
+  rpc StartApp (StartAppReq) returns (StartAppResp) {
     option (google.api.http) = {
-      get: "/get/turtle/list"
+      post: "/start/App"
+      body: "*"
     };
   }
+  // 关闭互玩
+  rpc EndApp (EndAppReq) returns (.google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/end/App"
+      body: "*"
+    };
+  }
+}
+
+message StartAppResp {
+  // 游戏ID
+  string game_id = 1 [(validate.rules).string = {min_len: 1}];
+}
+
+message StartAppReq {
+  // 直播间ID
+  string room_id = 1;
+  // 开播主播的身份码
+  string up_id = 2 [(validate.rules).string = {min_len: 1}];
+}
+
+message EndAppReq {
+  // 游戏ID
+  string game_id = 1 [(validate.rules).string = {min_len: 1}];
 }
 
 message GetTurtleListReq {
   // 分页参数
-  int32 page = 1;
-  int32 pageSize = 2;
+  int32 page = 1; // @inject_tag: form:"page"
+  int32 page_size = 2 ; // @inject_tag: form:"page_size"
   // 状态
-  Turtle.State state = 3;
+  Turtle.State state = 3 ; // @inject_tag: form:"state"
   // 分类
-  Turtle.Category category = 4;
+  Turtle.Category category = 4 ; // @inject_tag: form:"category"
+  // 难度
+  Turtle.Degree difficulty = 5 ; // @inject_tag: form:"difficulty"
 }
 
 message GetTurtleListResp {
   repeated Turtle turtles = 1;
+  int32 total = 2;
 }
 
 // The request message containing the user's name.
@@ -67,6 +95,16 @@ message Turtle {
     // 其他
     CUSTOM = 100;
   }
+  enum Degree {
+    // 未知难度
+    UNDECIDED = 0;
+    // 简单
+    EASY = 1;
+    // 中等
+    MEDIUM = 2;
+    // 困难
+    HARD = 3;
+  }
   // 唯一标识（例：HT_001）
   string qid = 1;
   // 谜题标题（例：“深夜弹珠声”）
@@ -77,11 +115,10 @@ message Turtle {
   string answer = 4 [(validate.rules).string = {min_len: 1}];
   // 分类（恐怖/推理/搞笑/其他）
   Category  category = 5 [(validate.rules).enum = {defined_only: true}];
+  // 难度（简单/中等/困难）
+  Degree difficulty = 6 [(validate.rules).enum = {defined_only: true}];
   // 创建者（主播UID或观众UID）
-  string creator = 6 [(validate.rules).string = {min_len: 1}];
+  string creator = 7 [(validate.rules).string = {min_len: 1}];
   // 状态（审核中/已上线/已删除）
-  State state = 7;
-}
-
-message SetTurtleBatchResp {
+  State state = 8;
 }

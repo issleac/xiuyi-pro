@@ -9,6 +9,7 @@ message Bootstrap {
   Trace  trace = 1;
   Server server = 2;
   Data data = 3;
+  Application application = 4;
 }
 
 message Server {
@@ -46,4 +47,14 @@ message Data {
 
 message Trace {
   string endpoint = 1;
+}
+
+message Application {
+  message Live {
+    string host = 1;
+    string accessKey = 2;
+    string accessSecret = 3;
+    int64 appId = 4;
+  }
+  Live live = 1;
 }

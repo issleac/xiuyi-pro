@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"math/rand"
 	"time"
 	pb "xiuyiPro/api/turtle/v1"
 	"xiuyiPro/internal/biz"
 )
 
-func (s *TurtleService) SetTurtleBatch(ctx context.Context, req *pb.SetTurtleBatchReq) (resp *pb.SetTurtleBatchResp, err error) {
-	resp = new(pb.SetTurtleBatchResp)
+func (s *TurtleService) SetTurtleBatch(ctx context.Context, req *pb.SetTurtleBatchReq) (resp *emptypb.Empty, err error) {
+	resp = new(emptypb.Empty)
 	if req == nil || len(req.Turtles) == 0 {
-		return nil, errors.BadRequest("参数错误", "SetTurtleBatch")
+		return resp, errors.BadRequest("参数错误", "SetTurtleBatch")
 	}
 	s.log.WithContext(ctx).Infof("SetTurtleBatch req(%+v)", req)
 	var (
@@ -21,32 +22,34 @@ func (s *TurtleService) SetTurtleBatch(ctx context.Context, req *pb.SetTurtleBat
 	)
 	for _, t := range req.Turtles {
 		turtles = append(turtles, &biz.Turtle{
-			Qid:      s.generateQid(),
-			Title:    t.Title,
-			Content:  t.Content,
-			Answer:   t.Answer,
-			Category: int32(t.Category),
-			Creator:  t.Creator,
-			State:    int32(pb.Turtle_ONLINE),
+			Qid:        s.generateQid(),
+			Title:      t.Title,
+			Content:    t.Content,
+			Answer:     t.Answer,
+			Category:   int32(t.Category),
+			Difficulty: int32(t.Difficulty),
+			Creator:    t.Creator,
+			State:      int32(pb.Turtle_ONLINE),
 		})
 	}
 	if _, err = s.repo.CreateTurtles(ctx, turtles); err != nil {
-		s.log.WithContext(ctx).Errorf("CreateTurtles err(%+v)", err)
+		s.log.WithContext(ctx).Errorf("SetTurtleBatch CreateTurtles err(%+v)", err)
 		return
 	}
-	return &pb.SetTurtleBatchResp{}, nil
+	return resp, nil
 }
 
 func (s *TurtleService) GetTurtleList(ctx context.Context, req *pb.GetTurtleListReq) (resp *pb.GetTurtleListResp, err error) {
 	resp = new(pb.GetTurtleListResp)
 	if req == nil {
-		return nil, errors.BadRequest("400", "GetTurtleList")
+		return nil, errors.BadRequest("参数错误", "GetTurtleList")
 	}
 	s.log.WithContext(ctx).Infof("GetTurtleList req(%+v)", req)
 	var (
 		limit, offset int32
 		t             = new(biz.Turtle)
 		res           []*biz.Turtle
+		total         int32
 	)
 	if req.GetPage() > 0 && req.GetPageSize() > 0 {
 		limit = req.GetPageSize()
@@ -58,21 +61,26 @@ func (s *TurtleService) GetTurtleList(ctx context.Context, req *pb.GetTurtleList
 	if req.GetCategory() > 0 {
 		t.Category = int32(req.GetCategory())
 	}
-	if res, err = s.repo.GetTurtleByPage(ctx, limit, offset, t); err != nil {
+	if req.GetDifficulty() > 0 {
+		t.Difficulty = int32(req.GetDifficulty())
+	}
+	if res, total, err = s.repo.GetTurtleByPage(ctx, limit, offset, t); err != nil {
 		s.log.WithContext(ctx).Errorf("GetTurtleByPage err(%+v)", err)
 		return
 	}
 	for _, v := range res {
 		resp.Turtles = append(resp.Turtles, &pb.Turtle{
-			Qid:      v.Qid,
-			Title:    v.Title,
-			Content:  v.Content,
-			Answer:   v.Answer,
-			Category: pb.Turtle_Category(v.Category),
-			Creator:  v.Creator,
-			State:    pb.Turtle_State(v.State),
+			Qid:        v.Qid,
+			Title:      v.Title,
+			Content:    v.Content,
+			Answer:     v.Answer,
+			Category:   pb.Turtle_Category(v.Category),
+			Difficulty: pb.Turtle_Degree(v.Difficulty),
+			Creator:    v.Creator,
+			State:      pb.Turtle_State(v.State),
 		})
 	}
+	resp.Total = total
 	return
 }
 

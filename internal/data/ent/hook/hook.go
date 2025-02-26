@@ -8,6 +8,18 @@ import (
 	"xiuyiPro/internal/data/ent"
 )
 
+// The IdiomFunc type is an adapter to allow the use of ordinary
+// function as Idiom mutator.
+type IdiomFunc func(context.Context, *ent.IdiomMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f IdiomFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.IdiomMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IdiomMutation", m)
+}
+
 // The TurtleFunc type is an adapter to allow the use of ordinary
 // function as Turtle mutator.
 type TurtleFunc func(context.Context, *ent.TurtleMutation) (ent.Value, error)

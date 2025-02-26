@@ -23,7 +23,7 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, application *conf.Application, logger log.Logger) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
@@ -31,11 +31,14 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	greeterRepo := data.NewGreeterRepo(dataData, logger)
 	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
 	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
+	idiomRepo := data.NewIdiomRepo(dataData, logger)
+	idiomUsecase := biz.NewIdiomUsecase(idiomRepo, logger)
+	idiomService := service.NewIdiomService(application, idiomUsecase, logger)
+	grpcServer := server.NewGRPCServer(confServer, greeterService, idiomService, logger)
 	turtleRepo := data.NewTurtleRepo(dataData, logger)
 	turtleUsecase := biz.NewTurtleUsecase(turtleRepo, logger)
-	turtleService := service.NewTurtleService(turtleUsecase, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, turtleService, logger)
+	turtleService := service.NewTurtleService(application, turtleUsecase, logger)
+	httpServer := server.NewHTTPServer(confServer, greeterService, turtleService, idiomService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

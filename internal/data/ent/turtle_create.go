@@ -56,6 +56,12 @@ func (tc *TurtleCreate) SetCreator(s string) *TurtleCreate {
 	return tc
 }
 
+// SetDifficulty sets the "difficulty" field.
+func (tc *TurtleCreate) SetDifficulty(i int32) *TurtleCreate {
+	tc.mutation.SetDifficulty(i)
+	return tc
+}
+
 // SetState sets the "state" field.
 func (tc *TurtleCreate) SetState(i int32) *TurtleCreate {
 	tc.mutation.SetState(i)
@@ -161,6 +167,9 @@ func (tc *TurtleCreate) check() error {
 	if _, ok := tc.mutation.Creator(); !ok {
 		return &ValidationError{Name: "creator", err: errors.New(`ent: missing required field "Turtle.creator"`)}
 	}
+	if _, ok := tc.mutation.Difficulty(); !ok {
+		return &ValidationError{Name: "difficulty", err: errors.New(`ent: missing required field "Turtle.difficulty"`)}
+	}
 	if _, ok := tc.mutation.State(); !ok {
 		return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "Turtle.state"`)}
 	}
@@ -225,6 +234,10 @@ func (tc *TurtleCreate) createSpec() (*Turtle, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.Creator(); ok {
 		_spec.SetField(turtle.FieldCreator, field.TypeString, value)
 		_node.Creator = value
+	}
+	if value, ok := tc.mutation.Difficulty(); ok {
+		_spec.SetField(turtle.FieldDifficulty, field.TypeInt32, value)
+		_node.Difficulty = value
 	}
 	if value, ok := tc.mutation.State(); ok {
 		_spec.SetField(turtle.FieldState, field.TypeInt32, value)

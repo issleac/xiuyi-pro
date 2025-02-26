@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package idiom.v1;
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+import "google/protobuf/descriptor.proto";
+
+option go_package = "xiuyiPro/api/idiom/v1;v1";
+option java_multiple_files = true;
+option java_package = "dev.kratos.api.idiom.v1";
+option java_outer_classname = "IdiomProtoV1";
+
+service idiom {
+  // 批量写入成语
+  rpc SetIdiomBatch (SetIdiomBatchReq) returns (.google.protobuf.Empty) {}
+  // 获取成语
+  rpc GetIdiom (GetIdiomReq) returns (GetIdiomResp) {}
+  // 获取排行榜
+  rpc GetRanking (GetRankingReq) returns (GetRankingResp) {}
+  // 更新排行榜
+  rpc UpdateRanking (UpdateRankingReq) returns (.google.protobuf.Empty) {}
+}
+
+message UpdateRankingReq {
+  int64 roomId = 1;
+  int64 uid = 2;
+}
+
+message GetRankingReq {
+  int64 roomId = 1;
+  int32 limit = 2; // @inject_tag: form:"limit"
+}
+
+message GetRankingResp {
+  repeated Viewer viewers = 1;
+}
+
+message Viewer {
+  int64 uid = 1;
+  string face = 2;
+  string name = 3;
+  int64 Source = 4;
+  int64 Index = 5;
+}
+
+message SetIdiomBatchReq {
+  repeated Idiom idioms = 1;
+  int32 total = 2;
+}
+
+message GetIdiomReq {
+  int64 id = 1; // @inject_tag: form:"id"
+}
+
+message GetIdiomResp {
+  Idiom idiom = 1;
+}
+
+message Idiom {
+  enum State {
+    // 未知状态
+    INVALID = 0;
+    // 审核中
+    AUDITING = 1;
+    // 已上线
+    ONLINE = 2;
+    // 已下线
+    OFFLINE = 3;
+  }
+  enum Degree {
+    // 未知难度
+    UNDECIDED = 0;
+    // 简单
+    EASY = 1;
+    // 中等
+    MEDIUM = 2;
+    // 困难
+    HARD = 3;
+  }
+  int64 id = 1;
+  // 唯一标识（例：HT_001）
+  string iid = 2;
+  // 成语
+  string answer = 3;
+  // 图片地址
+  string image = 4;
+  // 难度
+  Degree difficulty = 5;
+  // 创建者
+  string creator = 6 [(validate.rules).string = {min_len: 1}];
+  // 状态（审核中/已上线/已删除）
+  State state = 7;
+}

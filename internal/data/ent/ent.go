@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"sync"
+	"xiuyiPro/internal/data/ent/idiom"
 	"xiuyiPro/internal/data/ent/turtle"
 	"xiuyiPro/internal/data/ent/user"
 
@@ -74,6 +75,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			idiom.Table:  idiom.ValidColumn,
 			turtle.Table: turtle.ValidColumn,
 			user.Table:   user.ValidColumn,
 		})

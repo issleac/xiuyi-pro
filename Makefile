@@ -24,6 +24,7 @@ init:
 	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
 	go install github.com/google/wire/cmd/wire@latest
+	go install github.com/favadi/protoc-go-inject-tag@latest
 
 .PHONY: config
 # generate internal proto
@@ -43,6 +44,12 @@ api:
  	       --go-grpc_out=paths=source_relative:./api \
 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
 	       $(API_PROTO_FILES)
+	protoc-go-inject-tag -input=./api/turtle/v1/*.pb.go  # 注入标签
+	protoc-go-inject-tag -input=./api/idiom/v1/*.pb.go  # 注入标签
+
+.PHONY: ent
+ent:
+	go generate ./internal/data/ent
 
 .PHONY: build
 # build

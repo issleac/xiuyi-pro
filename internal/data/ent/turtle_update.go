@@ -119,6 +119,27 @@ func (tu *TurtleUpdate) SetNillableCreator(s *string) *TurtleUpdate {
 	return tu
 }
 
+// SetDifficulty sets the "difficulty" field.
+func (tu *TurtleUpdate) SetDifficulty(i int32) *TurtleUpdate {
+	tu.mutation.ResetDifficulty()
+	tu.mutation.SetDifficulty(i)
+	return tu
+}
+
+// SetNillableDifficulty sets the "difficulty" field if the given value is not nil.
+func (tu *TurtleUpdate) SetNillableDifficulty(i *int32) *TurtleUpdate {
+	if i != nil {
+		tu.SetDifficulty(*i)
+	}
+	return tu
+}
+
+// AddDifficulty adds i to the "difficulty" field.
+func (tu *TurtleUpdate) AddDifficulty(i int32) *TurtleUpdate {
+	tu.mutation.AddDifficulty(i)
+	return tu
+}
+
 // SetState sets the "state" field.
 func (tu *TurtleUpdate) SetState(i int32) *TurtleUpdate {
 	tu.mutation.ResetState()
@@ -229,6 +250,12 @@ func (tu *TurtleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.Creator(); ok {
 		_spec.SetField(turtle.FieldCreator, field.TypeString, value)
+	}
+	if value, ok := tu.mutation.Difficulty(); ok {
+		_spec.SetField(turtle.FieldDifficulty, field.TypeInt32, value)
+	}
+	if value, ok := tu.mutation.AddedDifficulty(); ok {
+		_spec.AddField(turtle.FieldDifficulty, field.TypeInt32, value)
 	}
 	if value, ok := tu.mutation.State(); ok {
 		_spec.SetField(turtle.FieldState, field.TypeInt32, value)
@@ -350,6 +377,27 @@ func (tuo *TurtleUpdateOne) SetNillableCreator(s *string) *TurtleUpdateOne {
 	if s != nil {
 		tuo.SetCreator(*s)
 	}
+	return tuo
+}
+
+// SetDifficulty sets the "difficulty" field.
+func (tuo *TurtleUpdateOne) SetDifficulty(i int32) *TurtleUpdateOne {
+	tuo.mutation.ResetDifficulty()
+	tuo.mutation.SetDifficulty(i)
+	return tuo
+}
+
+// SetNillableDifficulty sets the "difficulty" field if the given value is not nil.
+func (tuo *TurtleUpdateOne) SetNillableDifficulty(i *int32) *TurtleUpdateOne {
+	if i != nil {
+		tuo.SetDifficulty(*i)
+	}
+	return tuo
+}
+
+// AddDifficulty adds i to the "difficulty" field.
+func (tuo *TurtleUpdateOne) AddDifficulty(i int32) *TurtleUpdateOne {
+	tuo.mutation.AddDifficulty(i)
 	return tuo
 }
 
@@ -493,6 +541,12 @@ func (tuo *TurtleUpdateOne) sqlSave(ctx context.Context) (_node *Turtle, err err
 	}
 	if value, ok := tuo.mutation.Creator(); ok {
 		_spec.SetField(turtle.FieldCreator, field.TypeString, value)
+	}
+	if value, ok := tuo.mutation.Difficulty(); ok {
+		_spec.SetField(turtle.FieldDifficulty, field.TypeInt32, value)
+	}
+	if value, ok := tuo.mutation.AddedDifficulty(); ok {
+		_spec.AddField(turtle.FieldDifficulty, field.TypeInt32, value)
 	}
 	if value, ok := tuo.mutation.State(); ok {
 		_spec.SetField(turtle.FieldState, field.TypeInt32, value)

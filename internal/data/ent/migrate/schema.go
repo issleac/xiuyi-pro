@@ -8,6 +8,24 @@ import (
 )
 
 var (
+	// IdiomsColumns holds the columns for the "idioms" table.
+	IdiomsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt64, Increment: true},
+		{Name: "iid", Type: field.TypeString},
+		{Name: "answer", Type: field.TypeString},
+		{Name: "image", Type: field.TypeString},
+		{Name: "difficulty", Type: field.TypeInt32},
+		{Name: "creator", Type: field.TypeString},
+		{Name: "state", Type: field.TypeInt32},
+		{Name: "ctime", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
+		{Name: "mtime", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
+	}
+	// IdiomsTable holds the schema information for the "idioms" table.
+	IdiomsTable = &schema.Table{
+		Name:       "idioms",
+		Columns:    IdiomsColumns,
+		PrimaryKey: []*schema.Column{IdiomsColumns[0]},
+	}
 	// TurtlesColumns holds the columns for the "turtles" table.
 	TurtlesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -17,6 +35,7 @@ var (
 		{Name: "answer", Type: field.TypeString},
 		{Name: "category", Type: field.TypeInt32},
 		{Name: "creator", Type: field.TypeString},
+		{Name: "difficulty", Type: field.TypeInt32},
 		{Name: "state", Type: field.TypeInt32},
 		{Name: "ctime", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
 		{Name: "mtime", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
@@ -39,6 +58,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		IdiomsTable,
 		TurtlesTable,
 		UsersTable,
 	}

@@ -8,15 +8,16 @@ import (
 
 // Turtle is a Turtle model.
 type Turtle struct {
-	Qid      string
-	Title    string
-	Content  string
-	Answer   string
-	Category int32
-	Creator  string
-	State    int32
-	Ctime    time.Time
-	Mtime    time.Time
+	Qid        string
+	Title      string
+	Content    string
+	Answer     string
+	Category   int32
+	Difficulty int32
+	Creator    string
+	State      int32
+	Ctime      time.Time
+	Mtime      time.Time
 }
 
 // TurtleRepo is a Turtle repo.
@@ -26,7 +27,7 @@ type TurtleRepo interface {
 	FindByID(context.Context, int64) (*Turtle, error)
 	ListAll(context.Context) ([]*Turtle, error)
 	SaveBatch(context.Context, []*Turtle) ([]*Turtle, error)
-	ListByPage(c context.Context, limit, offset int32, t *Turtle) ([]*Turtle, error)
+	ListByPage(c context.Context, limit, offset int32, t *Turtle) ([]*Turtle, int32, error)
 }
 
 // TurtleUsecase is a Turtle usecase.
@@ -49,7 +50,7 @@ func (uc *TurtleUsecase) CreateTurtle(ctx context.Context, t *Turtle) (*Turtle, 
 }
 
 // GetTurtleByPage get a Turtle by page.
-func (uc *TurtleUsecase) GetTurtleByPage(ctx context.Context, limit int32, offset int32, t *Turtle) ([]*Turtle, error) {
+func (uc *TurtleUsecase) GetTurtleByPage(ctx context.Context, limit int32, offset int32, t *Turtle) ([]*Turtle, int32, error) {
 	return uc.repo.ListByPage(ctx, limit, offset, t)
 }
 
