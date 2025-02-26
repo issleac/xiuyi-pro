@@ -2,8 +2,10 @@ syntax = "proto3";
 
 package turtle.v1;
 
+import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "validate/validate.proto";
+import "google/protobuf/descriptor.proto";
 
 option go_package = "xiuyiPro/api/turtle/v1;v1";
 option java_multiple_files = true;
@@ -12,27 +14,30 @@ option java_outer_classname = "TurtleProtoV1";
 
 service turtle {
   // 批量写入谜题
-  rpc SetTurtleBatch (SetTurtleBatchReq) returns (SetTurtleBatchResp) {
+  rpc SetTurtleBatch (SetTurtleBatchReq) returns (.google.protobuf.Empty) {
     option (google.api.http) = {
       post: "/set/turtle/batch"
+      body: "*"
     };
   }
   // 分页读取谜题
   rpc GetTurtleList (GetTurtleListReq) returns (GetTurtleListResp) {
     option (google.api.http) = {
-      get: "/get/turtle/list"
+      get: "/get/turtle/list/{token}"
     };
   }
 }
 
 message GetTurtleListReq {
+  // 占位符
+  string token = 1;
   // 分页参数
-  int32 page = 1;
-  int32 pageSize = 2;
+  int32 page = 2;
+  int32 page_size = 3;
   // 状态
-  Turtle.State state = 3;
+  Turtle.State state = 4;
   // 分类
-  Turtle.Category category = 4;
+  Turtle.Category category = 5;
 }
 
 message GetTurtleListResp {
@@ -81,7 +86,4 @@ message Turtle {
   string creator = 6 [(validate.rules).string = {min_len: 1}];
   // 状态（审核中/已上线/已删除）
   State state = 7;
-}
-
-message SetTurtleBatchResp {
 }

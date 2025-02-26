@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"math/rand"
 	"time"
 	pb "xiuyiPro/api/turtle/v1"
 	"xiuyiPro/internal/biz"
 )
 
-func (s *TurtleService) SetTurtleBatch(ctx context.Context, req *pb.SetTurtleBatchReq) (resp *pb.SetTurtleBatchResp, err error) {
-	resp = new(pb.SetTurtleBatchResp)
+func (s *TurtleService) SetTurtleBatch(ctx context.Context, req *pb.SetTurtleBatchReq) (resp *emptypb.Empty, err error) {
+	resp = new(emptypb.Empty)
 	if req == nil || len(req.Turtles) == 0 {
-		return nil, errors.BadRequest("参数错误", "SetTurtleBatch")
+		return resp, errors.BadRequest("参数错误", "SetTurtleBatch")
 	}
 	s.log.WithContext(ctx).Infof("SetTurtleBatch req(%+v)", req)
 	var (
@@ -31,16 +32,16 @@ func (s *TurtleService) SetTurtleBatch(ctx context.Context, req *pb.SetTurtleBat
 		})
 	}
 	if _, err = s.repo.CreateTurtles(ctx, turtles); err != nil {
-		s.log.WithContext(ctx).Errorf("CreateTurtles err(%+v)", err)
+		s.log.WithContext(ctx).Errorf("SetTurtleBatch CreateTurtles err(%+v)", err)
 		return
 	}
-	return &pb.SetTurtleBatchResp{}, nil
+	return resp, nil
 }
 
 func (s *TurtleService) GetTurtleList(ctx context.Context, req *pb.GetTurtleListReq) (resp *pb.GetTurtleListResp, err error) {
 	resp = new(pb.GetTurtleListResp)
 	if req == nil {
-		return nil, errors.BadRequest("400", "GetTurtleList")
+		return nil, errors.BadRequest("参数错误", "GetTurtleList")
 	}
 	s.log.WithContext(ctx).Infof("GetTurtleList req(%+v)", req)
 	var (

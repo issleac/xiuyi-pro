@@ -10,6 +10,7 @@ import (
 	context "context"
 	http "github.com/go-kratos/kratos/v2/transport/http"
 	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -26,18 +27,21 @@ type TurtleHTTPServer interface {
 	// GetTurtleList 分页读取谜题
 	GetTurtleList(context.Context, *GetTurtleListReq) (*GetTurtleListResp, error)
 	// SetTurtleBatch 批量写入谜题
-	SetTurtleBatch(context.Context, *SetTurtleBatchReq) (*SetTurtleBatchResp, error)
+	SetTurtleBatch(context.Context, *SetTurtleBatchReq) (*emptypb.Empty, error)
 }
 
 func RegisterTurtleHTTPServer(s *http.Server, srv TurtleHTTPServer) {
 	r := s.Route("/")
 	r.POST("/set/turtle/batch", _Turtle_SetTurtleBatch0_HTTP_Handler(srv))
-	r.GET("/get/turtle/list", _Turtle_GetTurtleList0_HTTP_Handler(srv))
+	r.GET("/get/turtle/list/{token}", _Turtle_GetTurtleList0_HTTP_Handler(srv))
 }
 
 func _Turtle_SetTurtleBatch0_HTTP_Handler(srv TurtleHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in SetTurtleBatchReq
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -49,7 +53,7 @@ func _Turtle_SetTurtleBatch0_HTTP_Handler(srv TurtleHTTPServer) func(ctx http.Co
 		if err != nil {
 			return err
 		}
-		reply := out.(*SetTurtleBatchResp)
+		reply := out.(*emptypb.Empty)
 		return ctx.Result(200, reply)
 	}
 }
@@ -58,6 +62,9 @@ func _Turtle_GetTurtleList0_HTTP_Handler(srv TurtleHTTPServer) func(ctx http.Con
 	return func(ctx http.Context) error {
 		var in GetTurtleListReq
 		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
 			return err
 		}
 		http.SetOperation(ctx, OperationTurtleGetTurtleList)
@@ -75,7 +82,7 @@ func _Turtle_GetTurtleList0_HTTP_Handler(srv TurtleHTTPServer) func(ctx http.Con
 
 type TurtleHTTPClient interface {
 	GetTurtleList(ctx context.Context, req *GetTurtleListReq, opts ...http.CallOption) (rsp *GetTurtleListResp, err error)
-	SetTurtleBatch(ctx context.Context, req *SetTurtleBatchReq, opts ...http.CallOption) (rsp *SetTurtleBatchResp, err error)
+	SetTurtleBatch(ctx context.Context, req *SetTurtleBatchReq, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 }
 
 type TurtleHTTPClientImpl struct {
@@ -88,7 +95,7 @@ func NewTurtleHTTPClient(client *http.Client) TurtleHTTPClient {
 
 func (c *TurtleHTTPClientImpl) GetTurtleList(ctx context.Context, in *GetTurtleListReq, opts ...http.CallOption) (*GetTurtleListResp, error) {
 	var out GetTurtleListResp
-	pattern := "/get/turtle/list"
+	pattern := "/get/turtle/list/{token}"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationTurtleGetTurtleList))
 	opts = append(opts, http.PathTemplate(pattern))
@@ -99,13 +106,13 @@ func (c *TurtleHTTPClientImpl) GetTurtleList(ctx context.Context, in *GetTurtleL
 	return &out, nil
 }
 
-func (c *TurtleHTTPClientImpl) SetTurtleBatch(ctx context.Context, in *SetTurtleBatchReq, opts ...http.CallOption) (*SetTurtleBatchResp, error) {
-	var out SetTurtleBatchResp
+func (c *TurtleHTTPClientImpl) SetTurtleBatch(ctx context.Context, in *SetTurtleBatchReq, opts ...http.CallOption) (*emptypb.Empty, error) {
+	var out emptypb.Empty
 	pattern := "/set/turtle/batch"
-	path := binding.EncodeURL(pattern, in, true)
+	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationTurtleSetTurtleBatch))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, nil, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

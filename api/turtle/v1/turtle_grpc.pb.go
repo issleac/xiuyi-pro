@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -28,7 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TurtleClient interface {
 	// 批量写入谜题
-	SetTurtleBatch(ctx context.Context, in *SetTurtleBatchReq, opts ...grpc.CallOption) (*SetTurtleBatchResp, error)
+	SetTurtleBatch(ctx context.Context, in *SetTurtleBatchReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 分页读取谜题
 	GetTurtleList(ctx context.Context, in *GetTurtleListReq, opts ...grpc.CallOption) (*GetTurtleListResp, error)
 }
@@ -41,9 +42,9 @@ func NewTurtleClient(cc grpc.ClientConnInterface) TurtleClient {
 	return &turtleClient{cc}
 }
 
-func (c *turtleClient) SetTurtleBatch(ctx context.Context, in *SetTurtleBatchReq, opts ...grpc.CallOption) (*SetTurtleBatchResp, error) {
+func (c *turtleClient) SetTurtleBatch(ctx context.Context, in *SetTurtleBatchReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SetTurtleBatchResp)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, Turtle_SetTurtleBatch_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -66,7 +67,7 @@ func (c *turtleClient) GetTurtleList(ctx context.Context, in *GetTurtleListReq, 
 // for forward compatibility.
 type TurtleServer interface {
 	// 批量写入谜题
-	SetTurtleBatch(context.Context, *SetTurtleBatchReq) (*SetTurtleBatchResp, error)
+	SetTurtleBatch(context.Context, *SetTurtleBatchReq) (*emptypb.Empty, error)
 	// 分页读取谜题
 	GetTurtleList(context.Context, *GetTurtleListReq) (*GetTurtleListResp, error)
 	mustEmbedUnimplementedTurtleServer()
@@ -79,7 +80,7 @@ type TurtleServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTurtleServer struct{}
 
-func (UnimplementedTurtleServer) SetTurtleBatch(context.Context, *SetTurtleBatchReq) (*SetTurtleBatchResp, error) {
+func (UnimplementedTurtleServer) SetTurtleBatch(context.Context, *SetTurtleBatchReq) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetTurtleBatch not implemented")
 }
 func (UnimplementedTurtleServer) GetTurtleList(context.Context, *GetTurtleListReq) (*GetTurtleListResp, error) {
