@@ -35,6 +35,338 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on StartAppResp with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *StartAppResp) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StartAppResp with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in StartAppRespMultiError, or
+// nil if none found.
+func (m *StartAppResp) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StartAppResp) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if utf8.RuneCountInString(m.GetGameId()) < 1 {
+		err := StartAppRespValidationError{
+			field:  "GameId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return StartAppRespMultiError(errors)
+	}
+
+	return nil
+}
+
+// StartAppRespMultiError is an error wrapping multiple validation errors
+// returned by StartAppResp.ValidateAll() if the designated constraints aren't met.
+type StartAppRespMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StartAppRespMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StartAppRespMultiError) AllErrors() []error { return m }
+
+// StartAppRespValidationError is the validation error returned by
+// StartAppResp.Validate if the designated constraints aren't met.
+type StartAppRespValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StartAppRespValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StartAppRespValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StartAppRespValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StartAppRespValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StartAppRespValidationError) ErrorName() string { return "StartAppRespValidationError" }
+
+// Error satisfies the builtin error interface
+func (e StartAppRespValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStartAppResp.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StartAppRespValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StartAppRespValidationError{}
+
+// Validate checks the field values on StartAppReq with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *StartAppReq) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on StartAppReq with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in StartAppReqMultiError, or
+// nil if none found.
+func (m *StartAppReq) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *StartAppReq) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for RoomId
+
+	if utf8.RuneCountInString(m.GetUpId()) < 1 {
+		err := StartAppReqValidationError{
+			field:  "UpId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return StartAppReqMultiError(errors)
+	}
+
+	return nil
+}
+
+// StartAppReqMultiError is an error wrapping multiple validation errors
+// returned by StartAppReq.ValidateAll() if the designated constraints aren't met.
+type StartAppReqMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m StartAppReqMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m StartAppReqMultiError) AllErrors() []error { return m }
+
+// StartAppReqValidationError is the validation error returned by
+// StartAppReq.Validate if the designated constraints aren't met.
+type StartAppReqValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e StartAppReqValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e StartAppReqValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e StartAppReqValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e StartAppReqValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e StartAppReqValidationError) ErrorName() string { return "StartAppReqValidationError" }
+
+// Error satisfies the builtin error interface
+func (e StartAppReqValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sStartAppReq.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = StartAppReqValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = StartAppReqValidationError{}
+
+// Validate checks the field values on EndAppReq with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *EndAppReq) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on EndAppReq with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in EndAppReqMultiError, or nil
+// if none found.
+func (m *EndAppReq) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *EndAppReq) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if utf8.RuneCountInString(m.GetGameId()) < 1 {
+		err := EndAppReqValidationError{
+			field:  "GameId",
+			reason: "value length must be at least 1 runes",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return EndAppReqMultiError(errors)
+	}
+
+	return nil
+}
+
+// EndAppReqMultiError is an error wrapping multiple validation errors returned
+// by EndAppReq.ValidateAll() if the designated constraints aren't met.
+type EndAppReqMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m EndAppReqMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m EndAppReqMultiError) AllErrors() []error { return m }
+
+// EndAppReqValidationError is the validation error returned by
+// EndAppReq.Validate if the designated constraints aren't met.
+type EndAppReqValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e EndAppReqValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e EndAppReqValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e EndAppReqValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e EndAppReqValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e EndAppReqValidationError) ErrorName() string { return "EndAppReqValidationError" }
+
+// Error satisfies the builtin error interface
+func (e EndAppReqValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sEndAppReq.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = EndAppReqValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = EndAppReqValidationError{}
+
 // Validate checks the field values on GetTurtleListReq with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.

@@ -20,20 +20,28 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationTurtleEndApp = "/turtle.v1.turtle/EndApp"
 const OperationTurtleGetTurtleList = "/turtle.v1.turtle/GetTurtleList"
 const OperationTurtleSetTurtleBatch = "/turtle.v1.turtle/SetTurtleBatch"
+const OperationTurtleStartApp = "/turtle.v1.turtle/StartApp"
 
 type TurtleHTTPServer interface {
+	// EndApp 关闭互玩
+	EndApp(context.Context, *EndAppReq) (*emptypb.Empty, error)
 	// GetTurtleList 分页读取谜题
 	GetTurtleList(context.Context, *GetTurtleListReq) (*GetTurtleListResp, error)
 	// SetTurtleBatch 批量写入谜题
 	SetTurtleBatch(context.Context, *SetTurtleBatchReq) (*emptypb.Empty, error)
+	// StartApp 开启互玩
+	StartApp(context.Context, *StartAppReq) (*StartAppResp, error)
 }
 
 func RegisterTurtleHTTPServer(s *http.Server, srv TurtleHTTPServer) {
 	r := s.Route("/")
 	r.POST("/set/turtle/batch", _Turtle_SetTurtleBatch0_HTTP_Handler(srv))
 	r.GET("/get/turtle/list/{token}", _Turtle_GetTurtleList0_HTTP_Handler(srv))
+	r.POST("/start/App", _Turtle_StartApp0_HTTP_Handler(srv))
+	r.POST("/end/App", _Turtle_EndApp0_HTTP_Handler(srv))
 }
 
 func _Turtle_SetTurtleBatch0_HTTP_Handler(srv TurtleHTTPServer) func(ctx http.Context) error {
@@ -80,9 +88,55 @@ func _Turtle_GetTurtleList0_HTTP_Handler(srv TurtleHTTPServer) func(ctx http.Con
 	}
 }
 
+func _Turtle_StartApp0_HTTP_Handler(srv TurtleHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in StartAppReq
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTurtleStartApp)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.StartApp(ctx, req.(*StartAppReq))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*StartAppResp)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Turtle_EndApp0_HTTP_Handler(srv TurtleHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in EndAppReq
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationTurtleEndApp)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.EndApp(ctx, req.(*EndAppReq))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*emptypb.Empty)
+		return ctx.Result(200, reply)
+	}
+}
+
 type TurtleHTTPClient interface {
+	EndApp(ctx context.Context, req *EndAppReq, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	GetTurtleList(ctx context.Context, req *GetTurtleListReq, opts ...http.CallOption) (rsp *GetTurtleListResp, err error)
 	SetTurtleBatch(ctx context.Context, req *SetTurtleBatchReq, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
+	StartApp(ctx context.Context, req *StartAppReq, opts ...http.CallOption) (rsp *StartAppResp, err error)
 }
 
 type TurtleHTTPClientImpl struct {
@@ -91,6 +145,19 @@ type TurtleHTTPClientImpl struct {
 
 func NewTurtleHTTPClient(client *http.Client) TurtleHTTPClient {
 	return &TurtleHTTPClientImpl{client}
+}
+
+func (c *TurtleHTTPClientImpl) EndApp(ctx context.Context, in *EndAppReq, opts ...http.CallOption) (*emptypb.Empty, error) {
+	var out emptypb.Empty
+	pattern := "/end/App"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationTurtleEndApp))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *TurtleHTTPClientImpl) GetTurtleList(ctx context.Context, in *GetTurtleListReq, opts ...http.CallOption) (*GetTurtleListResp, error) {
@@ -111,6 +178,19 @@ func (c *TurtleHTTPClientImpl) SetTurtleBatch(ctx context.Context, in *SetTurtle
 	pattern := "/set/turtle/batch"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationTurtleSetTurtleBatch))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *TurtleHTTPClientImpl) StartApp(ctx context.Context, in *StartAppReq, opts ...http.CallOption) (*StartAppResp, error) {
+	var out StartAppResp
+	pattern := "/start/App"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationTurtleStartApp))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
