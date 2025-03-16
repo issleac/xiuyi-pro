@@ -29,6 +29,7 @@ func (r *TurtleRepo) Save(ctx context.Context, g *biz.Turtle) (*biz.Turtle, erro
 		SetContent(g.Content).
 		SetAnswer(g.Answer).
 		SetCategory(g.Category).
+		SetDifficulty(g.Difficulty).
 		SetCreator(g.Creator).
 		SetState(g.State).
 		Save(ctx)
@@ -46,15 +47,16 @@ func (r *TurtleRepo) FindByID(ctx context.Context, id int64) (*biz.Turtle, error
 		return nil, err
 	}
 	return &biz.Turtle{
-		Qid:      p.Qid,
-		Title:    p.Title,
-		Content:  p.Content,
-		Answer:   p.Answer,
-		Category: p.Category,
-		Creator:  p.Creator,
-		State:    p.State,
-		Ctime:    p.Ctime,
-		Mtime:    p.Mtime,
+		Qid:        p.Qid,
+		Title:      p.Title,
+		Content:    p.Content,
+		Answer:     p.Answer,
+		Category:   p.Category,
+		Difficulty: p.Difficulty,
+		Creator:    p.Creator,
+		State:      p.State,
+		Ctime:      p.Ctime,
+		Mtime:      p.Mtime,
 	}, nil
 }
 
@@ -67,21 +69,22 @@ func (r *TurtleRepo) ListAll(ctx context.Context) ([]*biz.Turtle, error) {
 	rv := make([]*biz.Turtle, 0)
 	for _, p := range ps {
 		rv = append(rv, &biz.Turtle{
-			Qid:      p.Qid,
-			Title:    p.Title,
-			Content:  p.Content,
-			Answer:   p.Answer,
-			Category: p.Category,
-			Creator:  p.Creator,
-			State:    p.State,
-			Ctime:    p.Ctime,
-			Mtime:    p.Mtime,
+			Qid:        p.Qid,
+			Title:      p.Title,
+			Content:    p.Content,
+			Answer:     p.Answer,
+			Category:   p.Category,
+			Difficulty: p.Difficulty,
+			Creator:    p.Creator,
+			State:      p.State,
+			Ctime:      p.Ctime,
+			Mtime:      p.Mtime,
 		})
 	}
 	return rv, nil
 }
 
-func (r *TurtleRepo) ListByPage(ctx context.Context, offset, limit int32, t *biz.Turtle) ([]*biz.Turtle, error) {
+func (r *TurtleRepo) ListByPage(ctx context.Context, limit, offset int32, t *biz.Turtle) ([]*biz.Turtle, int32, error) {
 	sql := r.data.db.Turtle.Query()
 	if t != nil && len(t.Qid) > 0 {
 		sql.Where(turtle.QidEQ(t.Qid))
@@ -95,29 +98,38 @@ func (r *TurtleRepo) ListByPage(ctx context.Context, offset, limit int32, t *biz
 	if t != nil && t.Category > 0 {
 		sql.Where(turtle.CategoryEQ(t.Category))
 	}
+	if t != nil && t.Difficulty > 0 {
+		sql.Where(turtle.DifficultyEQ(t.Difficulty))
+	}
+	total, err := sql.Count(ctx)
+	if err != nil {
+		r.log.WithContext(ctx).Error(err)
+		return nil, 0, err
+	}
 	if limit > 0 {
-		sql.Limit(int(limit)).Offset(int(offset))
+		sql.Offset(int(offset)).Limit(int(limit))
 	}
 	ps, err := sql.All(ctx)
 	if err != nil {
 		r.log.WithContext(ctx).Error(err)
-		return nil, err
+		return nil, 0, err
 	}
 	rv := make([]*biz.Turtle, 0)
 	for _, p := range ps {
 		rv = append(rv, &biz.Turtle{
-			Qid:      p.Qid,
-			Title:    p.Title,
-			Content:  p.Content,
-			Answer:   p.Answer,
-			Category: p.Category,
-			Creator:  p.Creator,
-			State:    p.State,
-			Ctime:    p.Ctime,
-			Mtime:    p.Mtime,
+			Qid:        p.Qid,
+			Title:      p.Title,
+			Content:    p.Content,
+			Answer:     p.Answer,
+			Category:   p.Category,
+			Difficulty: p.Difficulty,
+			Creator:    p.Creator,
+			State:      p.State,
+			Ctime:      p.Ctime,
+			Mtime:      p.Mtime,
 		})
 	}
-	return rv, nil
+	return rv, int32(total), nil
 }
 
 func (r *TurtleRepo) SaveBatch(ctx context.Context, turtles []*biz.Turtle) ([]*biz.Turtle, error) {
@@ -132,6 +144,7 @@ func (r *TurtleRepo) SaveBatch(ctx context.Context, turtles []*biz.Turtle) ([]*b
 			SetContent(t.Content).
 			SetAnswer(t.Answer).
 			SetCategory(t.Category).
+			SetDifficulty(t.Difficulty).
 			SetCreator(t.Creator).
 			SetState(t.State)
 	}
@@ -143,15 +156,16 @@ func (r *TurtleRepo) SaveBatch(ctx context.Context, turtles []*biz.Turtle) ([]*b
 	result := make([]*biz.Turtle, len(createdTurtles))
 	for i, t := range createdTurtles {
 		result[i] = &biz.Turtle{
-			Qid:      t.Qid,
-			Title:    t.Title,
-			Content:  t.Content,
-			Answer:   t.Answer,
-			Category: t.Category,
-			Creator:  t.Creator,
-			State:    t.State,
-			Ctime:    t.Ctime,
-			Mtime:    t.Mtime,
+			Qid:        t.Qid,
+			Title:      t.Title,
+			Content:    t.Content,
+			Answer:     t.Answer,
+			Category:   t.Category,
+			Creator:    t.Creator,
+			Difficulty: t.Difficulty,
+			State:      t.State,
+			Ctime:      t.Ctime,
+			Mtime:      t.Mtime,
 		}
 	}
 	return result, nil

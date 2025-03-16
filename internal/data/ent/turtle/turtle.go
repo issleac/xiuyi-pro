@@ -25,6 +25,8 @@ const (
 	FieldCategory = "category"
 	// FieldCreator holds the string denoting the creator field in the database.
 	FieldCreator = "creator"
+	// FieldDifficulty holds the string denoting the difficulty field in the database.
+	FieldDifficulty = "difficulty"
 	// FieldState holds the string denoting the state field in the database.
 	FieldState = "state"
 	// FieldCtime holds the string denoting the ctime field in the database.
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldAnswer,
 	FieldCategory,
 	FieldCreator,
+	FieldDifficulty,
 	FieldState,
 	FieldCtime,
 	FieldMtime,
@@ -102,6 +105,11 @@ func ByCategory(opts ...sql.OrderTermOption) OrderOption {
 // ByCreator orders the results by the creator field.
 func ByCreator(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCreator, opts...).ToFunc()
+}
+
+// ByDifficulty orders the results by the difficulty field.
+func ByDifficulty(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDifficulty, opts...).ToFunc()
 }
 
 // ByState orders the results by the state field.

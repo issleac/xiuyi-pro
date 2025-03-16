@@ -15,11 +15,11 @@ func init() {
 	turtleFields := schema.Turtle{}.Fields()
 	_ = turtleFields
 	// turtleDescCtime is the schema descriptor for ctime field.
-	turtleDescCtime := turtleFields[8].Descriptor()
+	turtleDescCtime := turtleFields[9].Descriptor()
 	// turtle.DefaultCtime holds the default value on creation for the ctime field.
 	turtle.DefaultCtime = turtleDescCtime.Default.(func() time.Time)
 	// turtleDescMtime is the schema descriptor for mtime field.
-	turtleDescMtime := turtleFields[9].Descriptor()
+	turtleDescMtime := turtleFields[10].Descriptor()
 	// turtle.DefaultMtime holds the default value on creation for the mtime field.
 	turtle.DefaultMtime = turtleDescMtime.Default.(func() time.Time)
 }

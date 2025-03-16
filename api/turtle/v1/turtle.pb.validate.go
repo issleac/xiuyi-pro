@@ -389,8 +389,6 @@ func (m *GetTurtleListReq) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for Token
-
 	// no validation rules for Page
 
 	// no validation rules for PageSize

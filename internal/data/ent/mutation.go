@@ -41,6 +41,8 @@ type TurtleMutation struct {
 	category      *int32
 	addcategory   *int32
 	creator       *string
+	difficulty    *int32
+	adddifficulty *int32
 	state         *int32
 	addstate      *int32
 	ctime         *time.Time
@@ -391,6 +393,62 @@ func (m *TurtleMutation) ResetCreator() {
 	m.creator = nil
 }
 
+// SetDifficulty sets the "difficulty" field.
+func (m *TurtleMutation) SetDifficulty(i int32) {
+	m.difficulty = &i
+	m.adddifficulty = nil
+}
+
+// Difficulty returns the value of the "difficulty" field in the mutation.
+func (m *TurtleMutation) Difficulty() (r int32, exists bool) {
+	v := m.difficulty
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDifficulty returns the old "difficulty" field's value of the Turtle entity.
+// If the Turtle object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TurtleMutation) OldDifficulty(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDifficulty is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDifficulty requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDifficulty: %w", err)
+	}
+	return oldValue.Difficulty, nil
+}
+
+// AddDifficulty adds i to the "difficulty" field.
+func (m *TurtleMutation) AddDifficulty(i int32) {
+	if m.adddifficulty != nil {
+		*m.adddifficulty += i
+	} else {
+		m.adddifficulty = &i
+	}
+}
+
+// AddedDifficulty returns the value that was added to the "difficulty" field in this mutation.
+func (m *TurtleMutation) AddedDifficulty() (r int32, exists bool) {
+	v := m.adddifficulty
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDifficulty resets all changes to the "difficulty" field.
+func (m *TurtleMutation) ResetDifficulty() {
+	m.difficulty = nil
+	m.adddifficulty = nil
+}
+
 // SetState sets the "state" field.
 func (m *TurtleMutation) SetState(i int32) {
 	m.state = &i
@@ -553,7 +611,7 @@ func (m *TurtleMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TurtleMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.qid != nil {
 		fields = append(fields, turtle.FieldQid)
 	}
@@ -571,6 +629,9 @@ func (m *TurtleMutation) Fields() []string {
 	}
 	if m.creator != nil {
 		fields = append(fields, turtle.FieldCreator)
+	}
+	if m.difficulty != nil {
+		fields = append(fields, turtle.FieldDifficulty)
 	}
 	if m.state != nil {
 		fields = append(fields, turtle.FieldState)
@@ -601,6 +662,8 @@ func (m *TurtleMutation) Field(name string) (ent.Value, bool) {
 		return m.Category()
 	case turtle.FieldCreator:
 		return m.Creator()
+	case turtle.FieldDifficulty:
+		return m.Difficulty()
 	case turtle.FieldState:
 		return m.State()
 	case turtle.FieldCtime:
@@ -628,6 +691,8 @@ func (m *TurtleMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldCategory(ctx)
 	case turtle.FieldCreator:
 		return m.OldCreator(ctx)
+	case turtle.FieldDifficulty:
+		return m.OldDifficulty(ctx)
 	case turtle.FieldState:
 		return m.OldState(ctx)
 	case turtle.FieldCtime:
@@ -685,6 +750,13 @@ func (m *TurtleMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetCreator(v)
 		return nil
+	case turtle.FieldDifficulty:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDifficulty(v)
+		return nil
 	case turtle.FieldState:
 		v, ok := value.(int32)
 		if !ok {
@@ -717,6 +789,9 @@ func (m *TurtleMutation) AddedFields() []string {
 	if m.addcategory != nil {
 		fields = append(fields, turtle.FieldCategory)
 	}
+	if m.adddifficulty != nil {
+		fields = append(fields, turtle.FieldDifficulty)
+	}
 	if m.addstate != nil {
 		fields = append(fields, turtle.FieldState)
 	}
@@ -730,6 +805,8 @@ func (m *TurtleMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case turtle.FieldCategory:
 		return m.AddedCategory()
+	case turtle.FieldDifficulty:
+		return m.AddedDifficulty()
 	case turtle.FieldState:
 		return m.AddedState()
 	}
@@ -747,6 +824,13 @@ func (m *TurtleMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddCategory(v)
+		return nil
+	case turtle.FieldDifficulty:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDifficulty(v)
 		return nil
 	case turtle.FieldState:
 		v, ok := value.(int32)
@@ -799,6 +883,9 @@ func (m *TurtleMutation) ResetField(name string) error {
 		return nil
 	case turtle.FieldCreator:
 		m.ResetCreator()
+		return nil
+	case turtle.FieldDifficulty:
+		m.ResetDifficulty()
 		return nil
 	case turtle.FieldState:
 		m.ResetState()

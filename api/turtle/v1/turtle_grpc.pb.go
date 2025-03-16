@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.11.3
-// source: api/turtle/v1/turtle.proto
+// source: turtle/v1/turtle.proto
 
 package v1
 
@@ -240,5 +240,5 @@ var Turtle_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/turtle/v1/turtle.proto",
+	Metadata: "turtle/v1/turtle.proto",
 }

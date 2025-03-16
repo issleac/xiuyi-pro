@@ -5,6 +5,116 @@ openapi: 3.0.3
 info:
     title: ""
     version: 0.0.1
-paths: {}
+paths:
+    /end/App:
+        post:
+            tags:
+                - Turtle
+            description: 关闭互玩
+            operationId: Turtle_EndApp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/turtle.v1.EndAppReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /helloworld/{name}:
+        get:
+            tags:
+                - Greeter
+            description: Sends a greeting
+            operationId: Greeter_SayHello
+            parameters:
+                - name: name
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/helloworld.v1.HelloReply'
+    /start/App:
+        post:
+            tags:
+                - Turtle
+            description: 开启互玩
+            operationId: Turtle_StartApp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/turtle.v1.StartAppReq'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/turtle.v1.StartAppResp'
+    /v1/greeter/say_hello:
+        post:
+            tags:
+                - Greeter
+            description: Sends a greeting
+            operationId: Greeter_SayHello
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/helloworld.v1.HelloRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/helloworld.v1.HelloReply'
 components:
-    schemas: {}
+    schemas:
+        helloworld.v1.HelloReply:
+            type: object
+            properties:
+                message:
+                    type: string
+            description: The response message containing the greetings
+        helloworld.v1.HelloRequest:
+            type: object
+            properties:
+                name:
+                    type: string
+            description: The request message containing the user's name.
+        turtle.v1.EndAppReq:
+            type: object
+            properties:
+                gameId:
+                    type: string
+                    description: 游戏ID
+        turtle.v1.StartAppReq:
+            type: object
+            properties:
+                roomId:
+                    type: string
+                    description: 直播间ID
+                upId:
+                    type: string
+                    description: 开播主播的身份码
+        turtle.v1.StartAppResp:
+            type: object
+            properties:
+                gameId:
+                    type: string
+                    description: 游戏ID
+tags:
+    - name: Greeter
+      description: The greeting service definition.
+    - name: Turtle

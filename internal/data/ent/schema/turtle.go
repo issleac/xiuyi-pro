@@ -23,6 +23,7 @@ func (Turtle) Fields() []ent.Field {
 		field.String("answer"),
 		field.Int32("category"),
 		field.String("creator"),
+		field.Int32("difficulty"),
 		field.Int32("state"),
 		field.Time("ctime").
 			Default(time.Now).SchemaType(map[string]string{

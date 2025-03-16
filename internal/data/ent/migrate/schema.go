@@ -17,6 +17,7 @@ var (
 		{Name: "answer", Type: field.TypeString},
 		{Name: "category", Type: field.TypeInt32},
 		{Name: "creator", Type: field.TypeString},
+		{Name: "difficulty", Type: field.TypeInt32},
 		{Name: "state", Type: field.TypeInt32},
 		{Name: "ctime", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
 		{Name: "mtime", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},

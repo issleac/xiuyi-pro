@@ -29,6 +29,8 @@ type Turtle struct {
 	Category int32 `json:"category,omitempty"`
 	// Creator holds the value of the "creator" field.
 	Creator string `json:"creator,omitempty"`
+	// Difficulty holds the value of the "difficulty" field.
+	Difficulty int32 `json:"difficulty,omitempty"`
 	// State holds the value of the "state" field.
 	State int32 `json:"state,omitempty"`
 	// Ctime holds the value of the "ctime" field.
@@ -43,7 +45,7 @@ func (*Turtle) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case turtle.FieldID, turtle.FieldCategory, turtle.FieldState:
+		case turtle.FieldID, turtle.FieldCategory, turtle.FieldDifficulty, turtle.FieldState:
 			values[i] = new(sql.NullInt64)
 		case turtle.FieldQid, turtle.FieldTitle, turtle.FieldContent, turtle.FieldAnswer, turtle.FieldCreator:
 			values[i] = new(sql.NullString)
@@ -105,6 +107,12 @@ func (t *Turtle) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field creator", values[i])
 			} else if value.Valid {
 				t.Creator = value.String
+			}
+		case turtle.FieldDifficulty:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field difficulty", values[i])
+			} else if value.Valid {
+				t.Difficulty = int32(value.Int64)
 			}
 		case turtle.FieldState:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -177,6 +185,9 @@ func (t *Turtle) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("creator=")
 	builder.WriteString(t.Creator)
+	builder.WriteString(", ")
+	builder.WriteString("difficulty=")
+	builder.WriteString(fmt.Sprintf("%v", t.Difficulty))
 	builder.WriteString(", ")
 	builder.WriteString("state=")
 	builder.WriteString(fmt.Sprintf("%v", t.State))

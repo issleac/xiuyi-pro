@@ -84,6 +84,11 @@ func Creator(v string) predicate.Turtle {
 	return predicate.Turtle(sql.FieldEQ(FieldCreator, v))
 }
 
+// Difficulty applies equality check predicate on the "difficulty" field. It's identical to DifficultyEQ.
+func Difficulty(v int32) predicate.Turtle {
+	return predicate.Turtle(sql.FieldEQ(FieldDifficulty, v))
+}
+
 // State applies equality check predicate on the "state" field. It's identical to StateEQ.
 func State(v int32) predicate.Turtle {
 	return predicate.Turtle(sql.FieldEQ(FieldState, v))
@@ -462,6 +467,46 @@ func CreatorEqualFold(v string) predicate.Turtle {
 // CreatorContainsFold applies the ContainsFold predicate on the "creator" field.
 func CreatorContainsFold(v string) predicate.Turtle {
 	return predicate.Turtle(sql.FieldContainsFold(FieldCreator, v))
+}
+
+// DifficultyEQ applies the EQ predicate on the "difficulty" field.
+func DifficultyEQ(v int32) predicate.Turtle {
+	return predicate.Turtle(sql.FieldEQ(FieldDifficulty, v))
+}
+
+// DifficultyNEQ applies the NEQ predicate on the "difficulty" field.
+func DifficultyNEQ(v int32) predicate.Turtle {
+	return predicate.Turtle(sql.FieldNEQ(FieldDifficulty, v))
+}
+
+// DifficultyIn applies the In predicate on the "difficulty" field.
+func DifficultyIn(vs ...int32) predicate.Turtle {
+	return predicate.Turtle(sql.FieldIn(FieldDifficulty, vs...))
+}
+
+// DifficultyNotIn applies the NotIn predicate on the "difficulty" field.
+func DifficultyNotIn(vs ...int32) predicate.Turtle {
+	return predicate.Turtle(sql.FieldNotIn(FieldDifficulty, vs...))
+}
+
+// DifficultyGT applies the GT predicate on the "difficulty" field.
+func DifficultyGT(v int32) predicate.Turtle {
+	return predicate.Turtle(sql.FieldGT(FieldDifficulty, v))
+}
+
+// DifficultyGTE applies the GTE predicate on the "difficulty" field.
+func DifficultyGTE(v int32) predicate.Turtle {
+	return predicate.Turtle(sql.FieldGTE(FieldDifficulty, v))
+}
+
+// DifficultyLT applies the LT predicate on the "difficulty" field.
+func DifficultyLT(v int32) predicate.Turtle {
+	return predicate.Turtle(sql.FieldLT(FieldDifficulty, v))
+}
+
+// DifficultyLTE applies the LTE predicate on the "difficulty" field.
+func DifficultyLTE(v int32) predicate.Turtle {
+	return predicate.Turtle(sql.FieldLTE(FieldDifficulty, v))
 }
 
 // StateEQ applies the EQ predicate on the "state" field.
