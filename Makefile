@@ -45,6 +45,7 @@ api:
 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
 	       $(API_PROTO_FILES)
 	protoc-go-inject-tag -input=./api/turtle/v1/*.pb.go  # 注入标签
+	protoc-go-inject-tag -input=./api/idiom/v1/*.pb.go  # 注入标签
 
 .PHONY: ent
 ent:

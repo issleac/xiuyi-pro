@@ -19,10 +19,11 @@ import (
 
 var (
 	tSvr *service.TurtleService
+	iSvr *service.IdiomService
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, turtle *service.TurtleService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, turtle *service.TurtleService, idiom *service.IdiomService, logger log.Logger) *http.Server {
 	router := gin.Default()
 	// 使用kratos中间件
 	router.Use(kgin.Middlewares(recovery.Recovery(), customMiddleware))
@@ -48,6 +49,7 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, turtle *serv
 
 	httpSrv.HandlePrefix("/", router)
 	tSvr = turtle
+	iSvr = idiom
 	outerRouter(router)
 
 	return httpSrv
@@ -63,6 +65,11 @@ func outerRouter(router *gin.Engine) {
 	{
 		t.GET("/list", listTurtles)
 		t.POST("/set/batch", setBatchTurtles)
+	}
+	i := router.Group("/x/idiom")
+	{
+		i.GET("/get", getIdiom)
+		i.POST("/set/batch", setIdioms)
 	}
 }
 

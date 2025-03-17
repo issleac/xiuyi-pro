@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"sync"
 	"time"
+	"xiuyiPro/internal/data/ent/idiom"
 	"xiuyiPro/internal/data/ent/predicate"
 	"xiuyiPro/internal/data/ent/turtle"
 
@@ -24,9 +25,789 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeIdiom  = "Idiom"
 	TypeTurtle = "Turtle"
 	TypeUser   = "User"
 )
+
+// IdiomMutation represents an operation that mutates the Idiom nodes in the graph.
+type IdiomMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int64
+	iid           *string
+	name          *string
+	image         *string
+	difficulty    *int32
+	adddifficulty *int32
+	creator       *string
+	state         *int32
+	addstate      *int32
+	ctime         *time.Time
+	mtime         *time.Time
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Idiom, error)
+	predicates    []predicate.Idiom
+}
+
+var _ ent.Mutation = (*IdiomMutation)(nil)
+
+// idiomOption allows management of the mutation configuration using functional options.
+type idiomOption func(*IdiomMutation)
+
+// newIdiomMutation creates new mutation for the Idiom entity.
+func newIdiomMutation(c config, op Op, opts ...idiomOption) *IdiomMutation {
+	m := &IdiomMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeIdiom,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withIdiomID sets the ID field of the mutation.
+func withIdiomID(id int64) idiomOption {
+	return func(m *IdiomMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Idiom
+		)
+		m.oldValue = func(ctx context.Context) (*Idiom, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Idiom.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withIdiom sets the old Idiom of the mutation.
+func withIdiom(node *Idiom) idiomOption {
+	return func(m *IdiomMutation) {
+		m.oldValue = func(context.Context) (*Idiom, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m IdiomMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m IdiomMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Idiom entities.
+func (m *IdiomMutation) SetID(id int64) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *IdiomMutation) ID() (id int64, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *IdiomMutation) IDs(ctx context.Context) ([]int64, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int64{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Idiom.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetIid sets the "iid" field.
+func (m *IdiomMutation) SetIid(s string) {
+	m.iid = &s
+}
+
+// Iid returns the value of the "iid" field in the mutation.
+func (m *IdiomMutation) Iid() (r string, exists bool) {
+	v := m.iid
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIid returns the old "iid" field's value of the Idiom entity.
+// If the Idiom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IdiomMutation) OldIid(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIid is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIid requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIid: %w", err)
+	}
+	return oldValue.Iid, nil
+}
+
+// ResetIid resets all changes to the "iid" field.
+func (m *IdiomMutation) ResetIid() {
+	m.iid = nil
+}
+
+// SetName sets the "name" field.
+func (m *IdiomMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *IdiomMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Idiom entity.
+// If the Idiom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IdiomMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *IdiomMutation) ResetName() {
+	m.name = nil
+}
+
+// SetImage sets the "image" field.
+func (m *IdiomMutation) SetImage(s string) {
+	m.image = &s
+}
+
+// Image returns the value of the "image" field in the mutation.
+func (m *IdiomMutation) Image() (r string, exists bool) {
+	v := m.image
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImage returns the old "image" field's value of the Idiom entity.
+// If the Idiom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IdiomMutation) OldImage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImage: %w", err)
+	}
+	return oldValue.Image, nil
+}
+
+// ResetImage resets all changes to the "image" field.
+func (m *IdiomMutation) ResetImage() {
+	m.image = nil
+}
+
+// SetDifficulty sets the "difficulty" field.
+func (m *IdiomMutation) SetDifficulty(i int32) {
+	m.difficulty = &i
+	m.adddifficulty = nil
+}
+
+// Difficulty returns the value of the "difficulty" field in the mutation.
+func (m *IdiomMutation) Difficulty() (r int32, exists bool) {
+	v := m.difficulty
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDifficulty returns the old "difficulty" field's value of the Idiom entity.
+// If the Idiom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IdiomMutation) OldDifficulty(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDifficulty is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDifficulty requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDifficulty: %w", err)
+	}
+	return oldValue.Difficulty, nil
+}
+
+// AddDifficulty adds i to the "difficulty" field.
+func (m *IdiomMutation) AddDifficulty(i int32) {
+	if m.adddifficulty != nil {
+		*m.adddifficulty += i
+	} else {
+		m.adddifficulty = &i
+	}
+}
+
+// AddedDifficulty returns the value that was added to the "difficulty" field in this mutation.
+func (m *IdiomMutation) AddedDifficulty() (r int32, exists bool) {
+	v := m.adddifficulty
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDifficulty resets all changes to the "difficulty" field.
+func (m *IdiomMutation) ResetDifficulty() {
+	m.difficulty = nil
+	m.adddifficulty = nil
+}
+
+// SetCreator sets the "creator" field.
+func (m *IdiomMutation) SetCreator(s string) {
+	m.creator = &s
+}
+
+// Creator returns the value of the "creator" field in the mutation.
+func (m *IdiomMutation) Creator() (r string, exists bool) {
+	v := m.creator
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreator returns the old "creator" field's value of the Idiom entity.
+// If the Idiom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IdiomMutation) OldCreator(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreator is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreator requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreator: %w", err)
+	}
+	return oldValue.Creator, nil
+}
+
+// ResetCreator resets all changes to the "creator" field.
+func (m *IdiomMutation) ResetCreator() {
+	m.creator = nil
+}
+
+// SetState sets the "state" field.
+func (m *IdiomMutation) SetState(i int32) {
+	m.state = &i
+	m.addstate = nil
+}
+
+// State returns the value of the "state" field in the mutation.
+func (m *IdiomMutation) State() (r int32, exists bool) {
+	v := m.state
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldState returns the old "state" field's value of the Idiom entity.
+// If the Idiom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IdiomMutation) OldState(ctx context.Context) (v int32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldState is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldState requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldState: %w", err)
+	}
+	return oldValue.State, nil
+}
+
+// AddState adds i to the "state" field.
+func (m *IdiomMutation) AddState(i int32) {
+	if m.addstate != nil {
+		*m.addstate += i
+	} else {
+		m.addstate = &i
+	}
+}
+
+// AddedState returns the value that was added to the "state" field in this mutation.
+func (m *IdiomMutation) AddedState() (r int32, exists bool) {
+	v := m.addstate
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetState resets all changes to the "state" field.
+func (m *IdiomMutation) ResetState() {
+	m.state = nil
+	m.addstate = nil
+}
+
+// SetCtime sets the "ctime" field.
+func (m *IdiomMutation) SetCtime(t time.Time) {
+	m.ctime = &t
+}
+
+// Ctime returns the value of the "ctime" field in the mutation.
+func (m *IdiomMutation) Ctime() (r time.Time, exists bool) {
+	v := m.ctime
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCtime returns the old "ctime" field's value of the Idiom entity.
+// If the Idiom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IdiomMutation) OldCtime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCtime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCtime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCtime: %w", err)
+	}
+	return oldValue.Ctime, nil
+}
+
+// ResetCtime resets all changes to the "ctime" field.
+func (m *IdiomMutation) ResetCtime() {
+	m.ctime = nil
+}
+
+// SetMtime sets the "mtime" field.
+func (m *IdiomMutation) SetMtime(t time.Time) {
+	m.mtime = &t
+}
+
+// Mtime returns the value of the "mtime" field in the mutation.
+func (m *IdiomMutation) Mtime() (r time.Time, exists bool) {
+	v := m.mtime
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMtime returns the old "mtime" field's value of the Idiom entity.
+// If the Idiom object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IdiomMutation) OldMtime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMtime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMtime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMtime: %w", err)
+	}
+	return oldValue.Mtime, nil
+}
+
+// ResetMtime resets all changes to the "mtime" field.
+func (m *IdiomMutation) ResetMtime() {
+	m.mtime = nil
+}
+
+// Where appends a list predicates to the IdiomMutation builder.
+func (m *IdiomMutation) Where(ps ...predicate.Idiom) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the IdiomMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *IdiomMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Idiom, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *IdiomMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *IdiomMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Idiom).
+func (m *IdiomMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *IdiomMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.iid != nil {
+		fields = append(fields, idiom.FieldIid)
+	}
+	if m.name != nil {
+		fields = append(fields, idiom.FieldName)
+	}
+	if m.image != nil {
+		fields = append(fields, idiom.FieldImage)
+	}
+	if m.difficulty != nil {
+		fields = append(fields, idiom.FieldDifficulty)
+	}
+	if m.creator != nil {
+		fields = append(fields, idiom.FieldCreator)
+	}
+	if m.state != nil {
+		fields = append(fields, idiom.FieldState)
+	}
+	if m.ctime != nil {
+		fields = append(fields, idiom.FieldCtime)
+	}
+	if m.mtime != nil {
+		fields = append(fields, idiom.FieldMtime)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *IdiomMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case idiom.FieldIid:
+		return m.Iid()
+	case idiom.FieldName:
+		return m.Name()
+	case idiom.FieldImage:
+		return m.Image()
+	case idiom.FieldDifficulty:
+		return m.Difficulty()
+	case idiom.FieldCreator:
+		return m.Creator()
+	case idiom.FieldState:
+		return m.State()
+	case idiom.FieldCtime:
+		return m.Ctime()
+	case idiom.FieldMtime:
+		return m.Mtime()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *IdiomMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case idiom.FieldIid:
+		return m.OldIid(ctx)
+	case idiom.FieldName:
+		return m.OldName(ctx)
+	case idiom.FieldImage:
+		return m.OldImage(ctx)
+	case idiom.FieldDifficulty:
+		return m.OldDifficulty(ctx)
+	case idiom.FieldCreator:
+		return m.OldCreator(ctx)
+	case idiom.FieldState:
+		return m.OldState(ctx)
+	case idiom.FieldCtime:
+		return m.OldCtime(ctx)
+	case idiom.FieldMtime:
+		return m.OldMtime(ctx)
+	}
+	return nil, fmt.Errorf("unknown Idiom field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IdiomMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case idiom.FieldIid:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIid(v)
+		return nil
+	case idiom.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case idiom.FieldImage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImage(v)
+		return nil
+	case idiom.FieldDifficulty:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDifficulty(v)
+		return nil
+	case idiom.FieldCreator:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreator(v)
+		return nil
+	case idiom.FieldState:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetState(v)
+		return nil
+	case idiom.FieldCtime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCtime(v)
+		return nil
+	case idiom.FieldMtime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMtime(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Idiom field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *IdiomMutation) AddedFields() []string {
+	var fields []string
+	if m.adddifficulty != nil {
+		fields = append(fields, idiom.FieldDifficulty)
+	}
+	if m.addstate != nil {
+		fields = append(fields, idiom.FieldState)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *IdiomMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case idiom.FieldDifficulty:
+		return m.AddedDifficulty()
+	case idiom.FieldState:
+		return m.AddedState()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IdiomMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case idiom.FieldDifficulty:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDifficulty(v)
+		return nil
+	case idiom.FieldState:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddState(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Idiom numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *IdiomMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *IdiomMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *IdiomMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Idiom nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *IdiomMutation) ResetField(name string) error {
+	switch name {
+	case idiom.FieldIid:
+		m.ResetIid()
+		return nil
+	case idiom.FieldName:
+		m.ResetName()
+		return nil
+	case idiom.FieldImage:
+		m.ResetImage()
+		return nil
+	case idiom.FieldDifficulty:
+		m.ResetDifficulty()
+		return nil
+	case idiom.FieldCreator:
+		m.ResetCreator()
+		return nil
+	case idiom.FieldState:
+		m.ResetState()
+		return nil
+	case idiom.FieldCtime:
+		m.ResetCtime()
+		return nil
+	case idiom.FieldMtime:
+		m.ResetMtime()
+		return nil
+	}
+	return fmt.Errorf("unknown Idiom field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *IdiomMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *IdiomMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *IdiomMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *IdiomMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *IdiomMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *IdiomMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *IdiomMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Idiom unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *IdiomMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Idiom edge %s", name)
+}
 
 // TurtleMutation represents an operation that mutates the Turtle nodes in the graph.
 type TurtleMutation struct {

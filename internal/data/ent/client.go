@@ -11,6 +11,7 @@ import (
 
 	"xiuyiPro/internal/data/ent/migrate"
 
+	"xiuyiPro/internal/data/ent/idiom"
 	"xiuyiPro/internal/data/ent/turtle"
 	"xiuyiPro/internal/data/ent/user"
 
@@ -24,6 +25,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Idiom is the client for interacting with the Idiom builders.
+	Idiom *IdiomClient
 	// Turtle is the client for interacting with the Turtle builders.
 	Turtle *TurtleClient
 	// User is the client for interacting with the User builders.
@@ -39,6 +42,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Idiom = NewIdiomClient(c.config)
 	c.Turtle = NewTurtleClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -133,6 +137,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
+		Idiom:  NewIdiomClient(cfg),
 		Turtle: NewTurtleClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
@@ -154,6 +159,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
+		Idiom:  NewIdiomClient(cfg),
 		Turtle: NewTurtleClient(cfg),
 		User:   NewUserClient(cfg),
 	}, nil
@@ -162,7 +168,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Turtle.
+//		Idiom.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -184,6 +190,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Idiom.Use(hooks...)
 	c.Turtle.Use(hooks...)
 	c.User.Use(hooks...)
 }
@@ -191,6 +198,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Idiom.Intercept(interceptors...)
 	c.Turtle.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
@@ -198,12 +206,147 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *IdiomMutation:
+		return c.Idiom.mutate(ctx, m)
 	case *TurtleMutation:
 		return c.Turtle.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// IdiomClient is a client for the Idiom schema.
+type IdiomClient struct {
+	config
+}
+
+// NewIdiomClient returns a client for the Idiom from the given config.
+func NewIdiomClient(c config) *IdiomClient {
+	return &IdiomClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `idiom.Hooks(f(g(h())))`.
+func (c *IdiomClient) Use(hooks ...Hook) {
+	c.hooks.Idiom = append(c.hooks.Idiom, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `idiom.Intercept(f(g(h())))`.
+func (c *IdiomClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Idiom = append(c.inters.Idiom, interceptors...)
+}
+
+// Create returns a builder for creating a Idiom entity.
+func (c *IdiomClient) Create() *IdiomCreate {
+	mutation := newIdiomMutation(c.config, OpCreate)
+	return &IdiomCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Idiom entities.
+func (c *IdiomClient) CreateBulk(builders ...*IdiomCreate) *IdiomCreateBulk {
+	return &IdiomCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *IdiomClient) MapCreateBulk(slice any, setFunc func(*IdiomCreate, int)) *IdiomCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &IdiomCreateBulk{err: fmt.Errorf("calling to IdiomClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*IdiomCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &IdiomCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Idiom.
+func (c *IdiomClient) Update() *IdiomUpdate {
+	mutation := newIdiomMutation(c.config, OpUpdate)
+	return &IdiomUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *IdiomClient) UpdateOne(i *Idiom) *IdiomUpdateOne {
+	mutation := newIdiomMutation(c.config, OpUpdateOne, withIdiom(i))
+	return &IdiomUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *IdiomClient) UpdateOneID(id int64) *IdiomUpdateOne {
+	mutation := newIdiomMutation(c.config, OpUpdateOne, withIdiomID(id))
+	return &IdiomUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Idiom.
+func (c *IdiomClient) Delete() *IdiomDelete {
+	mutation := newIdiomMutation(c.config, OpDelete)
+	return &IdiomDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *IdiomClient) DeleteOne(i *Idiom) *IdiomDeleteOne {
+	return c.DeleteOneID(i.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *IdiomClient) DeleteOneID(id int64) *IdiomDeleteOne {
+	builder := c.Delete().Where(idiom.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &IdiomDeleteOne{builder}
+}
+
+// Query returns a query builder for Idiom.
+func (c *IdiomClient) Query() *IdiomQuery {
+	return &IdiomQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeIdiom},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Idiom entity by its id.
+func (c *IdiomClient) Get(ctx context.Context, id int64) (*Idiom, error) {
+	return c.Query().Where(idiom.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *IdiomClient) GetX(ctx context.Context, id int64) *Idiom {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *IdiomClient) Hooks() []Hook {
+	return c.hooks.Idiom
+}
+
+// Interceptors returns the client interceptors.
+func (c *IdiomClient) Interceptors() []Interceptor {
+	return c.inters.Idiom
+}
+
+func (c *IdiomClient) mutate(ctx context.Context, m *IdiomMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&IdiomCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&IdiomUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&IdiomUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&IdiomDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Idiom mutation op: %q", m.Op())
 	}
 }
 
@@ -476,9 +619,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Turtle, User []ent.Hook
+		Idiom, Turtle, User []ent.Hook
 	}
 	inters struct {
-		Turtle, User []ent.Interceptor
+		Idiom, Turtle, User []ent.Interceptor
 	}
 )

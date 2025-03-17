@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Idiom is the predicate function for idiom builders.
+type Idiom func(*sql.Selector)
+
 // Turtle is the predicate function for turtle builders.
 type Turtle func(*sql.Selector)
 

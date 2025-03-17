@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
+	ipb "xiuyiPro/api/idiom/v1"
 	pb "xiuyiPro/api/turtle/v1"
 	"xiuyiPro/internal/biz"
 	"xiuyiPro/internal/conf"
@@ -11,7 +12,7 @@ import (
 )
 
 // ProviderSet is service providers.
-var ProviderSet = wire.NewSet(NewGreeterService, NewTurtleService)
+var ProviderSet = wire.NewSet(NewGreeterService, NewTurtleService, NewIdiomService)
 
 type TurtleService struct {
 	pb.UnimplementedTurtleServer
@@ -20,6 +21,13 @@ type TurtleService struct {
 	cfg        *conf.Application
 	liveSingle *live.Live
 	wsDao      *websocket.Websocket
+}
+
+type IdiomService struct {
+	ipb.UnimplementedIdiomServer
+	repo *biz.IdiomUsecase
+	log  *log.Helper
+	cfg  *conf.Application
 }
 
 func NewTurtleService(cfg *conf.Application, repo *biz.TurtleUsecase, logger log.Logger) *TurtleService {
@@ -39,6 +47,18 @@ func NewTurtleService(cfg *conf.Application, repo *biz.TurtleUsecase, logger log
 	s.wsDao, err = websocket.New(s.log)
 	if err != nil {
 		panic(err)
+	}
+	return s
+}
+
+func NewIdiomService(cfg *conf.Application, repo *biz.IdiomUsecase, logger log.Logger) *IdiomService {
+	s := &IdiomService{
+		repo: repo,
+		log:  log.NewHelper(log.With(logger, "module", "service/idiom-service")),
+		cfg:  cfg,
+	}
+	if cfg == nil {
+		panic("config for NewTurtleService is nil")
 	}
 	return s
 }

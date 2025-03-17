@@ -4,6 +4,7 @@ package ent
 
 import (
 	"time"
+	"xiuyiPro/internal/data/ent/idiom"
 	"xiuyiPro/internal/data/ent/schema"
 	"xiuyiPro/internal/data/ent/turtle"
 )
@@ -12,6 +13,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	idiomFields := schema.Idiom{}.Fields()
+	_ = idiomFields
+	// idiomDescCtime is the schema descriptor for ctime field.
+	idiomDescCtime := idiomFields[7].Descriptor()
+	// idiom.DefaultCtime holds the default value on creation for the ctime field.
+	idiom.DefaultCtime = idiomDescCtime.Default.(func() time.Time)
+	// idiomDescMtime is the schema descriptor for mtime field.
+	idiomDescMtime := idiomFields[8].Descriptor()
+	// idiom.DefaultMtime holds the default value on creation for the mtime field.
+	idiom.DefaultMtime = idiomDescMtime.Default.(func() time.Time)
 	turtleFields := schema.Turtle{}.Fields()
 	_ = turtleFields
 	// turtleDescCtime is the schema descriptor for ctime field.
