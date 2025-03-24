@@ -10,13 +10,19 @@ import (
 type Idiom struct {
 	ID         int64
 	Iid        string
-	Name       string
+	Answer     string
 	Image      string
 	Difficulty int32
 	Creator    string
 	State      int32
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+}
+
+type ViewerRanking struct {
+	UID   int64
+	Index int64
+	Score int64
 }
 
 // IdiomRepo is an Idiom repo.
@@ -27,6 +33,8 @@ type IdiomRepo interface {
 	ListAll(context.Context) ([]*Idiom, error)
 	SaveBatch(context.Context, []*Idiom) ([]*Idiom, error)
 	ListByPage(context.Context, int32, int32, *Idiom) ([]*Idiom, int32, error)
+	GetTopRanking(context.Context, int64, int64) ([]*ViewerRanking, error)
+	UpsertRanking(context.Context, int64, string) error
 }
 
 // IdiomUsecase is an Idiom usecase.
@@ -60,4 +68,13 @@ func (uc *IdiomUsecase) CreateIdioms(ctx context.Context, i []*Idiom) ([]*Idiom,
 
 func (uc *IdiomUsecase) FindByID(ctx context.Context, id int64) (*Idiom, error) {
 	return uc.repo.FindByID(ctx, id)
+}
+
+func (uc *IdiomUsecase) GetTopRanking(ctx context.Context, roomid, limit int64) ([]*ViewerRanking, error) {
+	return uc.repo.GetTopRanking(ctx, roomid, limit)
+
+}
+
+func (uc *IdiomUsecase) UpsertRanking(ctx context.Context, roomId int64, uid string) error {
+	return uc.repo.UpsertRanking(ctx, roomId, uid)
 }

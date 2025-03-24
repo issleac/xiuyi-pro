@@ -37,7 +37,7 @@ type IdiomMutation struct {
 	typ           string
 	id            *int64
 	iid           *string
-	name          *string
+	answer        *string
 	image         *string
 	difficulty    *int32
 	adddifficulty *int32
@@ -192,40 +192,40 @@ func (m *IdiomMutation) ResetIid() {
 	m.iid = nil
 }
 
-// SetName sets the "name" field.
-func (m *IdiomMutation) SetName(s string) {
-	m.name = &s
+// SetAnswer sets the "answer" field.
+func (m *IdiomMutation) SetAnswer(s string) {
+	m.answer = &s
 }
 
-// Name returns the value of the "name" field in the mutation.
-func (m *IdiomMutation) Name() (r string, exists bool) {
-	v := m.name
+// Answer returns the value of the "answer" field in the mutation.
+func (m *IdiomMutation) Answer() (r string, exists bool) {
+	v := m.answer
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Idiom entity.
+// OldAnswer returns the old "answer" field's value of the Idiom entity.
 // If the Idiom object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *IdiomMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *IdiomMutation) OldAnswer(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldName is only allowed on UpdateOne operations")
+		return v, errors.New("OldAnswer is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldName requires an ID field in the mutation")
+		return v, errors.New("OldAnswer requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
+		return v, fmt.Errorf("querying old value for OldAnswer: %w", err)
 	}
-	return oldValue.Name, nil
+	return oldValue.Answer, nil
 }
 
-// ResetName resets all changes to the "name" field.
-func (m *IdiomMutation) ResetName() {
-	m.name = nil
+// ResetAnswer resets all changes to the "answer" field.
+func (m *IdiomMutation) ResetAnswer() {
+	m.answer = nil
 }
 
 // SetImage sets the "image" field.
@@ -522,8 +522,8 @@ func (m *IdiomMutation) Fields() []string {
 	if m.iid != nil {
 		fields = append(fields, idiom.FieldIid)
 	}
-	if m.name != nil {
-		fields = append(fields, idiom.FieldName)
+	if m.answer != nil {
+		fields = append(fields, idiom.FieldAnswer)
 	}
 	if m.image != nil {
 		fields = append(fields, idiom.FieldImage)
@@ -553,8 +553,8 @@ func (m *IdiomMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case idiom.FieldIid:
 		return m.Iid()
-	case idiom.FieldName:
-		return m.Name()
+	case idiom.FieldAnswer:
+		return m.Answer()
 	case idiom.FieldImage:
 		return m.Image()
 	case idiom.FieldDifficulty:
@@ -578,8 +578,8 @@ func (m *IdiomMutation) OldField(ctx context.Context, name string) (ent.Value, e
 	switch name {
 	case idiom.FieldIid:
 		return m.OldIid(ctx)
-	case idiom.FieldName:
-		return m.OldName(ctx)
+	case idiom.FieldAnswer:
+		return m.OldAnswer(ctx)
 	case idiom.FieldImage:
 		return m.OldImage(ctx)
 	case idiom.FieldDifficulty:
@@ -608,12 +608,12 @@ func (m *IdiomMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetIid(v)
 		return nil
-	case idiom.FieldName:
+	case idiom.FieldAnswer:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetName(v)
+		m.SetAnswer(v)
 		return nil
 	case idiom.FieldImage:
 		v, ok := value.(string)
@@ -736,8 +736,8 @@ func (m *IdiomMutation) ResetField(name string) error {
 	case idiom.FieldIid:
 		m.ResetIid()
 		return nil
-	case idiom.FieldName:
-		m.ResetName()
+	case idiom.FieldAnswer:
+		m.ResetAnswer()
 		return nil
 	case idiom.FieldImage:
 		m.ResetImage()

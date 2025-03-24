@@ -12,7 +12,7 @@ var (
 	IdiomsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
 		{Name: "iid", Type: field.TypeString},
-		{Name: "name", Type: field.TypeString},
+		{Name: "answer", Type: field.TypeString},
 		{Name: "image", Type: field.TypeString},
 		{Name: "difficulty", Type: field.TypeInt32},
 		{Name: "creator", Type: field.TypeString},

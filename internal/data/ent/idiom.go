@@ -19,8 +19,8 @@ type Idiom struct {
 	ID int64 `json:"id,omitempty"`
 	// Iid holds the value of the "iid" field.
 	Iid string `json:"iid,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
+	// Answer holds the value of the "answer" field.
+	Answer string `json:"answer,omitempty"`
 	// Image holds the value of the "image" field.
 	Image string `json:"image,omitempty"`
 	// Difficulty holds the value of the "difficulty" field.
@@ -43,7 +43,7 @@ func (*Idiom) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case idiom.FieldID, idiom.FieldDifficulty, idiom.FieldState:
 			values[i] = new(sql.NullInt64)
-		case idiom.FieldIid, idiom.FieldName, idiom.FieldImage, idiom.FieldCreator:
+		case idiom.FieldIid, idiom.FieldAnswer, idiom.FieldImage, idiom.FieldCreator:
 			values[i] = new(sql.NullString)
 		case idiom.FieldCtime, idiom.FieldMtime:
 			values[i] = new(sql.NullTime)
@@ -74,11 +74,11 @@ func (i *Idiom) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				i.Iid = value.String
 			}
-		case idiom.FieldName:
+		case idiom.FieldAnswer:
 			if value, ok := values[j].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[j])
+				return fmt.Errorf("unexpected type %T for field answer", values[j])
 			} else if value.Valid {
-				i.Name = value.String
+				i.Answer = value.String
 			}
 		case idiom.FieldImage:
 			if value, ok := values[j].(*sql.NullString); !ok {
@@ -155,8 +155,8 @@ func (i *Idiom) String() string {
 	builder.WriteString("iid=")
 	builder.WriteString(i.Iid)
 	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(i.Name)
+	builder.WriteString("answer=")
+	builder.WriteString(i.Answer)
 	builder.WriteString(", ")
 	builder.WriteString("image=")
 	builder.WriteString(i.Image)

@@ -59,9 +59,9 @@ func Iid(v string) predicate.Idiom {
 	return predicate.Idiom(sql.FieldEQ(FieldIid, v))
 }
 
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldEQ(FieldName, v))
+// Answer applies equality check predicate on the "answer" field. It's identical to AnswerEQ.
+func Answer(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldEQ(FieldAnswer, v))
 }
 
 // Image applies equality check predicate on the "image" field. It's identical to ImageEQ.
@@ -159,69 +159,69 @@ func IidContainsFold(v string) predicate.Idiom {
 	return predicate.Idiom(sql.FieldContainsFold(FieldIid, v))
 }
 
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldEQ(FieldName, v))
+// AnswerEQ applies the EQ predicate on the "answer" field.
+func AnswerEQ(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldEQ(FieldAnswer, v))
 }
 
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldNEQ(FieldName, v))
+// AnswerNEQ applies the NEQ predicate on the "answer" field.
+func AnswerNEQ(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldNEQ(FieldAnswer, v))
 }
 
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldIn(FieldName, vs...))
+// AnswerIn applies the In predicate on the "answer" field.
+func AnswerIn(vs ...string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldIn(FieldAnswer, vs...))
 }
 
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldNotIn(FieldName, vs...))
+// AnswerNotIn applies the NotIn predicate on the "answer" field.
+func AnswerNotIn(vs ...string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldNotIn(FieldAnswer, vs...))
 }
 
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldGT(FieldName, v))
+// AnswerGT applies the GT predicate on the "answer" field.
+func AnswerGT(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldGT(FieldAnswer, v))
 }
 
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldGTE(FieldName, v))
+// AnswerGTE applies the GTE predicate on the "answer" field.
+func AnswerGTE(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldGTE(FieldAnswer, v))
 }
 
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldLT(FieldName, v))
+// AnswerLT applies the LT predicate on the "answer" field.
+func AnswerLT(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldLT(FieldAnswer, v))
 }
 
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldLTE(FieldName, v))
+// AnswerLTE applies the LTE predicate on the "answer" field.
+func AnswerLTE(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldLTE(FieldAnswer, v))
 }
 
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldContains(FieldName, v))
+// AnswerContains applies the Contains predicate on the "answer" field.
+func AnswerContains(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldContains(FieldAnswer, v))
 }
 
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldHasPrefix(FieldName, v))
+// AnswerHasPrefix applies the HasPrefix predicate on the "answer" field.
+func AnswerHasPrefix(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldHasPrefix(FieldAnswer, v))
 }
 
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldHasSuffix(FieldName, v))
+// AnswerHasSuffix applies the HasSuffix predicate on the "answer" field.
+func AnswerHasSuffix(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldHasSuffix(FieldAnswer, v))
 }
 
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldEqualFold(FieldName, v))
+// AnswerEqualFold applies the EqualFold predicate on the "answer" field.
+func AnswerEqualFold(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldEqualFold(FieldAnswer, v))
 }
 
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Idiom {
-	return predicate.Idiom(sql.FieldContainsFold(FieldName, v))
+// AnswerContainsFold applies the ContainsFold predicate on the "answer" field.
+func AnswerContainsFold(v string) predicate.Idiom {
+	return predicate.Idiom(sql.FieldContainsFold(FieldAnswer, v))
 }
 
 // ImageEQ applies the EQ predicate on the "image" field.

@@ -70,6 +70,8 @@ func outerRouter(router *gin.Engine) {
 	{
 		i.GET("/get", getIdiom)
 		i.POST("/set/batch", setIdioms)
+		i.GET("/ranking", getRanking)
+		i.POST("/update/ranking", updateRanking)
 	}
 }
 

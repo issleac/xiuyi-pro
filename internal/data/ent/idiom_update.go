@@ -42,16 +42,16 @@ func (iu *IdiomUpdate) SetNillableIid(s *string) *IdiomUpdate {
 	return iu
 }
 
-// SetName sets the "name" field.
-func (iu *IdiomUpdate) SetName(s string) *IdiomUpdate {
-	iu.mutation.SetName(s)
+// SetAnswer sets the "answer" field.
+func (iu *IdiomUpdate) SetAnswer(s string) *IdiomUpdate {
+	iu.mutation.SetAnswer(s)
 	return iu
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (iu *IdiomUpdate) SetNillableName(s *string) *IdiomUpdate {
+// SetNillableAnswer sets the "answer" field if the given value is not nil.
+func (iu *IdiomUpdate) SetNillableAnswer(s *string) *IdiomUpdate {
 	if s != nil {
-		iu.SetName(*s)
+		iu.SetAnswer(*s)
 	}
 	return iu
 }
@@ -198,8 +198,8 @@ func (iu *IdiomUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := iu.mutation.Iid(); ok {
 		_spec.SetField(idiom.FieldIid, field.TypeString, value)
 	}
-	if value, ok := iu.mutation.Name(); ok {
-		_spec.SetField(idiom.FieldName, field.TypeString, value)
+	if value, ok := iu.mutation.Answer(); ok {
+		_spec.SetField(idiom.FieldAnswer, field.TypeString, value)
 	}
 	if value, ok := iu.mutation.Image(); ok {
 		_spec.SetField(idiom.FieldImage, field.TypeString, value)
@@ -259,16 +259,16 @@ func (iuo *IdiomUpdateOne) SetNillableIid(s *string) *IdiomUpdateOne {
 	return iuo
 }
 
-// SetName sets the "name" field.
-func (iuo *IdiomUpdateOne) SetName(s string) *IdiomUpdateOne {
-	iuo.mutation.SetName(s)
+// SetAnswer sets the "answer" field.
+func (iuo *IdiomUpdateOne) SetAnswer(s string) *IdiomUpdateOne {
+	iuo.mutation.SetAnswer(s)
 	return iuo
 }
 
-// SetNillableName sets the "name" field if the given value is not nil.
-func (iuo *IdiomUpdateOne) SetNillableName(s *string) *IdiomUpdateOne {
+// SetNillableAnswer sets the "answer" field if the given value is not nil.
+func (iuo *IdiomUpdateOne) SetNillableAnswer(s *string) *IdiomUpdateOne {
 	if s != nil {
-		iuo.SetName(*s)
+		iuo.SetAnswer(*s)
 	}
 	return iuo
 }
@@ -445,8 +445,8 @@ func (iuo *IdiomUpdateOne) sqlSave(ctx context.Context) (_node *Idiom, err error
 	if value, ok := iuo.mutation.Iid(); ok {
 		_spec.SetField(idiom.FieldIid, field.TypeString, value)
 	}
-	if value, ok := iuo.mutation.Name(); ok {
-		_spec.SetField(idiom.FieldName, field.TypeString, value)
+	if value, ok := iuo.mutation.Answer(); ok {
+		_spec.SetField(idiom.FieldAnswer, field.TypeString, value)
 	}
 	if value, ok := iuo.mutation.Image(); ok {
 		_spec.SetField(idiom.FieldImage, field.TypeString, value)

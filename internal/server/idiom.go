@@ -41,3 +41,37 @@ func setIdioms(c *gin.Context) {
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
 }
+
+func getRanking(c *gin.Context) {
+	var (
+		req = new(pb.GetRankingReq)
+	)
+	err := c.ShouldBindQuery(req)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	resp, err := iSvr.GetRanking(c, req)
+	if err != nil {
+		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		return
+	}
+	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
+}
+
+func updateRanking(c *gin.Context) {
+	var (
+		req = new(pb.UpdateRankingReq)
+	)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	resp, err := iSvr.UpdateRanking(c, req)
+	if err != nil {
+		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		return
+	}
+	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
+}

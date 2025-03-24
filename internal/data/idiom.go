@@ -24,7 +24,7 @@ func (r *IdiomRepo) Save(ctx context.Context, i *biz.Idiom) (*biz.Idiom, error) 
 	_, err := r.data.db.Idiom.
 		Create().
 		SetIid(i.Iid).
-		SetName(i.Name).
+		SetAnswer(i.Answer).
 		SetImage(i.Image).
 		SetDifficulty(i.Difficulty).
 		SetCreator(i.Creator).
@@ -46,7 +46,7 @@ func (r *IdiomRepo) FindByID(ctx context.Context, id int64) (*biz.Idiom, error) 
 	return &biz.Idiom{
 		ID:         p.ID,
 		Iid:        p.Iid,
-		Name:       p.Name,
+		Answer:     p.Answer,
 		Image:      p.Image,
 		Difficulty: p.Difficulty,
 		Creator:    p.Creator,
@@ -67,7 +67,7 @@ func (r *IdiomRepo) ListAll(ctx context.Context) ([]*biz.Idiom, error) {
 		ret = append(ret, &biz.Idiom{
 			ID:         p.ID,
 			Iid:        p.Iid,
-			Name:       p.Name,
+			Answer:     p.Answer,
 			Image:      p.Image,
 			Difficulty: p.Difficulty,
 			Creator:    p.Creator,
@@ -91,7 +91,7 @@ func (r *IdiomRepo) SaveBatch(ctx context.Context, Idioms []*biz.Idiom) ([]*biz.
 	for i, t := range Idioms {
 		bulk[i] = r.data.db.Idiom.Create().
 			SetIid(t.Iid).
-			SetName(t.Name).
+			SetAnswer(t.Answer).
 			SetImage(t.Image).
 			SetDifficulty(t.Difficulty).
 			SetCreator(t.Creator).
@@ -107,7 +107,7 @@ func (r *IdiomRepo) SaveBatch(ctx context.Context, Idioms []*biz.Idiom) ([]*biz.
 		result[i] = &biz.Idiom{
 			ID:         t.ID,
 			Iid:        t.Iid,
-			Name:       t.Name,
+			Answer:     t.Answer,
 			Image:      t.Image,
 			Creator:    t.Creator,
 			Difficulty: t.Difficulty,

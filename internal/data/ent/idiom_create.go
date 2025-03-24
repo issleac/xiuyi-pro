@@ -26,9 +26,9 @@ func (ic *IdiomCreate) SetIid(s string) *IdiomCreate {
 	return ic
 }
 
-// SetName sets the "name" field.
-func (ic *IdiomCreate) SetName(s string) *IdiomCreate {
-	ic.mutation.SetName(s)
+// SetAnswer sets the "answer" field.
+func (ic *IdiomCreate) SetAnswer(s string) *IdiomCreate {
+	ic.mutation.SetAnswer(s)
 	return ic
 }
 
@@ -140,8 +140,8 @@ func (ic *IdiomCreate) check() error {
 	if _, ok := ic.mutation.Iid(); !ok {
 		return &ValidationError{Name: "iid", err: errors.New(`ent: missing required field "Idiom.iid"`)}
 	}
-	if _, ok := ic.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Idiom.name"`)}
+	if _, ok := ic.mutation.Answer(); !ok {
+		return &ValidationError{Name: "answer", err: errors.New(`ent: missing required field "Idiom.answer"`)}
 	}
 	if _, ok := ic.mutation.Image(); !ok {
 		return &ValidationError{Name: "image", err: errors.New(`ent: missing required field "Idiom.image"`)}
@@ -197,9 +197,9 @@ func (ic *IdiomCreate) createSpec() (*Idiom, *sqlgraph.CreateSpec) {
 		_spec.SetField(idiom.FieldIid, field.TypeString, value)
 		_node.Iid = value
 	}
-	if value, ok := ic.mutation.Name(); ok {
-		_spec.SetField(idiom.FieldName, field.TypeString, value)
-		_node.Name = value
+	if value, ok := ic.mutation.Answer(); ok {
+		_spec.SetField(idiom.FieldAnswer, field.TypeString, value)
+		_node.Answer = value
 	}
 	if value, ok := ic.mutation.Image(); ok {
 		_spec.SetField(idiom.FieldImage, field.TypeString, value)

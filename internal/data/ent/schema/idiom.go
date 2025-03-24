@@ -18,7 +18,7 @@ func (Idiom) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int64("id"),
 		field.String("iid"),
-		field.String("name"),
+		field.String("answer"),
 		field.String("image"),
 		field.Int32("difficulty"),
 		field.String("creator"),

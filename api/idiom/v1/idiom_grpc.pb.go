@@ -22,6 +22,8 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Idiom_SetIdiomBatch_FullMethodName = "/idiom.v1.idiom/SetIdiomBatch"
 	Idiom_GetIdiom_FullMethodName      = "/idiom.v1.idiom/GetIdiom"
+	Idiom_GetRanking_FullMethodName    = "/idiom.v1.idiom/GetRanking"
+	Idiom_UpdateRanking_FullMethodName = "/idiom.v1.idiom/UpdateRanking"
 )
 
 // IdiomClient is the client API for Idiom service.
@@ -32,6 +34,10 @@ type IdiomClient interface {
 	SetIdiomBatch(ctx context.Context, in *SetIdiomBatchReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 获取成语
 	GetIdiom(ctx context.Context, in *GetIdiomReq, opts ...grpc.CallOption) (*GetIdiomResp, error)
+	// 获取排行榜
+	GetRanking(ctx context.Context, in *GetRankingReq, opts ...grpc.CallOption) (*GetRankingResp, error)
+	// 更新排行榜
+	UpdateRanking(ctx context.Context, in *UpdateRankingReq, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type idiomClient struct {
@@ -62,6 +68,26 @@ func (c *idiomClient) GetIdiom(ctx context.Context, in *GetIdiomReq, opts ...grp
 	return out, nil
 }
 
+func (c *idiomClient) GetRanking(ctx context.Context, in *GetRankingReq, opts ...grpc.CallOption) (*GetRankingResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetRankingResp)
+	err := c.cc.Invoke(ctx, Idiom_GetRanking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *idiomClient) UpdateRanking(ctx context.Context, in *UpdateRankingReq, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, Idiom_UpdateRanking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // IdiomServer is the server API for Idiom service.
 // All implementations must embed UnimplementedIdiomServer
 // for forward compatibility.
@@ -70,6 +96,10 @@ type IdiomServer interface {
 	SetIdiomBatch(context.Context, *SetIdiomBatchReq) (*emptypb.Empty, error)
 	// 获取成语
 	GetIdiom(context.Context, *GetIdiomReq) (*GetIdiomResp, error)
+	// 获取排行榜
+	GetRanking(context.Context, *GetRankingReq) (*GetRankingResp, error)
+	// 更新排行榜
+	UpdateRanking(context.Context, *UpdateRankingReq) (*emptypb.Empty, error)
 	mustEmbedUnimplementedIdiomServer()
 }
 
@@ -85,6 +115,12 @@ func (UnimplementedIdiomServer) SetIdiomBatch(context.Context, *SetIdiomBatchReq
 }
 func (UnimplementedIdiomServer) GetIdiom(context.Context, *GetIdiomReq) (*GetIdiomResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetIdiom not implemented")
+}
+func (UnimplementedIdiomServer) GetRanking(context.Context, *GetRankingReq) (*GetRankingResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRanking not implemented")
+}
+func (UnimplementedIdiomServer) UpdateRanking(context.Context, *UpdateRankingReq) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRanking not implemented")
 }
 func (UnimplementedIdiomServer) mustEmbedUnimplementedIdiomServer() {}
 func (UnimplementedIdiomServer) testEmbeddedByValue()               {}
@@ -143,6 +179,42 @@ func _Idiom_GetIdiom_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Idiom_GetRanking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRankingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdiomServer).GetRanking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Idiom_GetRanking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdiomServer).GetRanking(ctx, req.(*GetRankingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Idiom_UpdateRanking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRankingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdiomServer).UpdateRanking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Idiom_UpdateRanking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdiomServer).UpdateRanking(ctx, req.(*UpdateRankingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Idiom_ServiceDesc is the grpc.ServiceDesc for Idiom service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -157,6 +229,14 @@ var Idiom_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetIdiom",
 			Handler:    _Idiom_GetIdiom_Handler,
+		},
+		{
+			MethodName: "GetRanking",
+			Handler:    _Idiom_GetRanking_Handler,
+		},
+		{
+			MethodName: "UpdateRanking",
+			Handler:    _Idiom_UpdateRanking_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

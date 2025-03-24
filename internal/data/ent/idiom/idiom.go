@@ -15,8 +15,8 @@ const (
 	FieldID = "id"
 	// FieldIid holds the string denoting the iid field in the database.
 	FieldIid = "iid"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
+	// FieldAnswer holds the string denoting the answer field in the database.
+	FieldAnswer = "answer"
 	// FieldImage holds the string denoting the image field in the database.
 	FieldImage = "image"
 	// FieldDifficulty holds the string denoting the difficulty field in the database.
@@ -37,7 +37,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldIid,
-	FieldName,
+	FieldAnswer,
 	FieldImage,
 	FieldDifficulty,
 	FieldCreator,
@@ -76,9 +76,9 @@ func ByIid(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIid, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
+// ByAnswer orders the results by the answer field.
+func ByAnswer(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAnswer, opts...).ToFunc()
 }
 
 // ByImage orders the results by the image field.
