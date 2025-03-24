@@ -1,17 +1,38 @@
-package service
+package turtle
 
 import (
 	"context"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
+	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"math/rand"
 	"time"
 	pb "xiuyiPro/api/turtle/v1"
 	"xiuyiPro/internal/biz"
+	"xiuyiPro/internal/conf"
 )
 
-func (s *TurtleService) SetTurtleBatch(ctx context.Context, req *pb.SetTurtleBatchReq) (resp *emptypb.Empty, err error) {
+type Service struct {
+	pb.UnimplementedTurtleServer
+	repo *biz.TurtleUsecase
+	log  *log.Helper
+	cfg  *conf.Application
+}
+
+func NewTurtleService(cfg *conf.Application, repo *biz.TurtleUsecase, logger log.Logger) *Service {
+	if cfg == nil {
+		panic("config for NewTurtleService is nil")
+	}
+	s := &Service{
+		repo: repo,
+		log:  log.NewHelper(log.With(logger, "module", "service/turtle-service")),
+		cfg:  cfg,
+	}
+	return s
+}
+
+func (s *Service) SetTurtleBatch(ctx context.Context, req *pb.SetTurtleBatchReq) (resp *emptypb.Empty, err error) {
 	resp = new(emptypb.Empty)
 	if req == nil || len(req.Turtles) == 0 {
 		return resp, errors.BadRequest("参数错误", "SetTurtleBatch")
@@ -39,7 +60,7 @@ func (s *TurtleService) SetTurtleBatch(ctx context.Context, req *pb.SetTurtleBat
 	return resp, nil
 }
 
-func (s *TurtleService) GetTurtleList(ctx context.Context, req *pb.GetTurtleListReq) (resp *pb.GetTurtleListResp, err error) {
+func (s *Service) GetTurtleList(ctx context.Context, req *pb.GetTurtleListReq) (resp *pb.GetTurtleListResp, err error) {
 	resp = new(pb.GetTurtleListResp)
 	if req == nil {
 		return nil, errors.BadRequest("参数错误", "GetTurtleList")
@@ -85,7 +106,7 @@ func (s *TurtleService) GetTurtleList(ctx context.Context, req *pb.GetTurtleList
 }
 
 // 生成唯一建qid
-func (s *TurtleService) generateQid() string {
+func (s *Service) generateQid() string {
 	// Turtle Soup
 	return fmt.Sprintf("TS-%d-%d", time.Now().UnixNano(), rand.Intn(10000))
 }

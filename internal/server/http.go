@@ -10,7 +10,9 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 	helV1 "xiuyiPro/api/helloworld/v1"
 	"xiuyiPro/internal/conf"
-	"xiuyiPro/internal/service"
+	"xiuyiPro/internal/service/greeter"
+	"xiuyiPro/internal/service/idiom"
+	"xiuyiPro/internal/service/turtle"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -18,12 +20,12 @@ import (
 )
 
 var (
-	tSvr *service.TurtleService
-	iSvr *service.IdiomService
+	tSvr *turtle.Service
+	iSvr *idiom.Service
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, turtle *service.TurtleService, idiom *service.IdiomService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, greeter *greeter.GreeterService, turtle *turtle.Service, idiom *idiom.Service, logger log.Logger) *http.Server {
 	router := gin.Default()
 	// 使用kratos中间件
 	router.Use(kgin.Middlewares(recovery.Recovery(), customMiddleware))

@@ -6,6 +6,7 @@ import (
 
 type Websocket struct {
 	log *log.Helper
+	ws  *WebsocketClient
 }
 
 func New(logger *log.Helper) (*Websocket, error) {

@@ -12,7 +12,7 @@ import (
 )
 
 // StartWebsocket 启动长连
-func (w *Websocket) StartWebsocket(c context.Context, wsAddr, authBody string) (err error) {
+func (w *Websocket) StartWebsocket(c context.Context, wsAddr, authBody string, doMsg protoLogic) (err error) {
 	w.log.WithContext(c).Info("StartWebsocket wsAddr:", wsAddr)
 	// 建立连接
 	conn, _, err := websocket.DefaultDialer.Dial(wsAddr, nil)
@@ -20,29 +20,32 @@ func (w *Websocket) StartWebsocket(c context.Context, wsAddr, authBody string) (
 		fmt.Println(err)
 		return
 	}
-	ws := &WebsocketClient{
+	w.ws = &WebsocketClient{
 		conn:      conn,
 		msgBuf:    make(chan *Proto, 1024),
 		dispather: make(map[int32]protoLogic),
 	}
 
 	// 注册分发处理函数
-	ws.dispather[OP_AUTH_REPLY] = ws.authResp
-	ws.dispather[OP_HEARTBEAT_REPLY] = ws.heartBeatResp
-	ws.dispather[OP_SEND_SMS_REPLY] = ws.msgResp
+	w.ws.dispather[OP_AUTH_REPLY] = w.ws.authResp
+	w.ws.dispather[OP_HEARTBEAT_REPLY] = w.ws.heartBeatResp
+	w.ws.dispather[OP_SEND_SMS_REPLY] = w.ws.msgResp
+	if doMsg != nil {
+		w.ws.dispather[OP_SEND_SMS_REPLY] = doMsg
+	}
 
 	// 发送鉴权信息
-	err = ws.sendAuth(authBody)
+	err = w.ws.sendAuth(authBody)
 	if err != nil {
 		w.log.WithContext(c).Error("StartWebsocket sendAuth err:", err)
 		return
 	}
 
 	// 读取信息
-	go ws.ReadMsg()
+	go w.ws.ReadMsg()
 
 	// 处理信息
-	go ws.DoEvent()
+	go w.ws.DoEvent()
 
 	return
 }
@@ -169,8 +172,10 @@ func (wc *WebsocketClient) heartBeatResp(msg *Proto) (err error) {
 
 // msgResp 可以这里做回调
 func (wc *WebsocketClient) msgResp(msg *Proto) (err error) {
+	// https://open-live.bilibili.com/document/f9ce25be-312e-1f4a-85fd-fef21f1637f8#h1-u76F4u64ADu95F4u6570u636E
 	for index, cmd := range msg.BodyMuti {
 		log.Printf("[WebsocketClient | msgResp] recv MsgResp index:%d ver:%d cmd:%s", index, msg.Version, string(cmd))
+
 	}
 	return
 }

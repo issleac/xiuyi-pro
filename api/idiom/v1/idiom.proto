@@ -3,7 +3,6 @@ syntax = "proto3";
 package idiom.v1;
 
 import "google/protobuf/empty.proto";
-import "google/api/annotations.proto";
 import "validate/validate.proto";
 import "google/protobuf/descriptor.proto";
 
@@ -21,11 +20,32 @@ service idiom {
   rpc GetRanking (GetRankingReq) returns (GetRankingResp) {}
   // 更新排行榜
   rpc UpdateRanking (UpdateRankingReq) returns (.google.protobuf.Empty) {}
+  // 开启互玩
+  rpc StartApp (StartAppReq) returns (StartAppResp) {}
+  // 关闭互玩
+  rpc EndApp (EndAppReq) returns (.google.protobuf.Empty) {}
+}
+
+message StartAppResp {
+  // 游戏ID
+  string game_id = 1;
+}
+
+message StartAppReq {
+  // 直播间ID
+  string room_id = 1;
+  // 开播主播的身份码
+  string up_code_id = 2 [(validate.rules).string = {min_len: 1}];
+}
+
+message EndAppReq {
+  // 游戏ID
+  string game_id = 1 [(validate.rules).string = {min_len: 1}];
 }
 
 message UpdateRankingReq {
   int64 roomId = 1;
-  int64 uid = 2;
+  Viewer viewer = 2;
 }
 
 message GetRankingReq {
@@ -38,7 +58,7 @@ message GetRankingResp {
 }
 
 message Viewer {
-  int64 uid = 1;
+  string uid = 1;
   string face = 2;
   string name = 3;
   int64 Source = 4;
@@ -51,7 +71,9 @@ message SetIdiomBatchReq {
 }
 
 message GetIdiomReq {
-  int64 id = 1; // @inject_tag: form:"id"
+  int64 gameId = 1; // @inject_tag: form:"game_id"
+  int64 roomId = 2; // @inject_tag: form:"room_id"
+  int64 id = 3; // @inject_tag: form:"id"
 }
 
 message GetIdiomResp {

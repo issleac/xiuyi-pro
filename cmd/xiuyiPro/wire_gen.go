@@ -13,7 +13,9 @@ import (
 	"xiuyiPro/internal/conf"
 	"xiuyiPro/internal/data"
 	"xiuyiPro/internal/server"
-	"xiuyiPro/internal/service"
+	"xiuyiPro/internal/service/greeter"
+	"xiuyiPro/internal/service/idiom"
+	"xiuyiPro/internal/service/turtle"
 )
 
 import (
@@ -30,14 +32,14 @@ func wireApp(confServer *conf.Server, confData *conf.Data, application *conf.App
 	}
 	greeterRepo := data.NewGreeterRepo(dataData, logger)
 	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase)
+	greeterService := greeter.NewGreeterService(greeterUsecase)
 	idiomRepo := data.NewIdiomRepo(dataData, logger)
 	idiomUsecase := biz.NewIdiomUsecase(idiomRepo, logger)
-	idiomService := service.NewIdiomService(application, idiomUsecase, logger)
+	idiomService := idiom.NewIdiomService(application, idiomUsecase, logger)
 	grpcServer := server.NewGRPCServer(confServer, greeterService, idiomService, logger)
 	turtleRepo := data.NewTurtleRepo(dataData, logger)
 	turtleUsecase := biz.NewTurtleUsecase(turtleRepo, logger)
-	turtleService := service.NewTurtleService(application, turtleUsecase, logger)
+	turtleService := turtle.NewTurtleService(application, turtleUsecase, logger)
 	httpServer := server.NewHTTPServer(confServer, greeterService, turtleService, idiomService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {

@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"time"
 )
@@ -20,7 +21,9 @@ type Idiom struct {
 }
 
 type ViewerRanking struct {
-	UID   int64
+	UID   string
+	Face  string
+	Name  string
 	Index int64
 	Score int64
 }
@@ -34,7 +37,9 @@ type IdiomRepo interface {
 	SaveBatch(context.Context, []*Idiom) ([]*Idiom, error)
 	ListByPage(context.Context, int32, int32, *Idiom) ([]*Idiom, int32, error)
 	GetTopRanking(context.Context, int64, int64) ([]*ViewerRanking, error)
-	UpsertRanking(context.Context, int64, string) error
+	UpsertRanking(context.Context, int64, *ViewerRanking, int64) error
+	SetRedisKey(context.Context, string, string, int64) error
+	GetRedisKey(context.Context, string) (string, error)
 }
 
 // IdiomUsecase is an Idiom usecase.
@@ -75,6 +80,18 @@ func (uc *IdiomUsecase) GetTopRanking(ctx context.Context, roomid, limit int64) 
 
 }
 
-func (uc *IdiomUsecase) UpsertRanking(ctx context.Context, roomId int64, uid string) error {
-	return uc.repo.UpsertRanking(ctx, roomId, uid)
+func (uc *IdiomUsecase) UpsertRanking(ctx context.Context, roomId int64, viewer *ViewerRanking, timeout int64) error {
+	return uc.repo.UpsertRanking(ctx, roomId, viewer, timeout)
+}
+
+func (uc *IdiomUsecase) SetGameAnswer(ctx context.Context, gameId int64, answer string, timeout int64) error {
+	return uc.repo.SetRedisKey(ctx, getGameAnswerKey(gameId), answer, timeout)
+}
+
+func (uc *IdiomUsecase) GetGameAnswer(ctx context.Context, gameId int64) (string, error) {
+	return uc.repo.GetRedisKey(ctx, getGameAnswerKey(gameId))
+}
+
+func getGameAnswerKey(gameId int64) string {
+	return fmt.Sprintf("game_answer_%d", gameId)
 }

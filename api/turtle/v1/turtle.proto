@@ -17,37 +17,6 @@ service turtle {
   rpc SetTurtleBatch (SetTurtleBatchReq) returns (.google.protobuf.Empty) {}
   // 分页读取谜题
   rpc GetTurtleList (GetTurtleListReq) returns (GetTurtleListResp) {}
-  // 开启互玩
-  rpc StartApp (StartAppReq) returns (StartAppResp) {
-    option (google.api.http) = {
-      post: "/start/App"
-      body: "*"
-    };
-  }
-  // 关闭互玩
-  rpc EndApp (EndAppReq) returns (.google.protobuf.Empty) {
-    option (google.api.http) = {
-      post: "/end/App"
-      body: "*"
-    };
-  }
-}
-
-message StartAppResp {
-  // 游戏ID
-  string game_id = 1 [(validate.rules).string = {min_len: 1}];
-}
-
-message StartAppReq {
-  // 直播间ID
-  string room_id = 1;
-  // 开播主播的身份码
-  string up_id = 2 [(validate.rules).string = {min_len: 1}];
-}
-
-message EndAppReq {
-  // 游戏ID
-  string game_id = 1 [(validate.rules).string = {min_len: 1}];
 }
 
 message GetTurtleListReq {
