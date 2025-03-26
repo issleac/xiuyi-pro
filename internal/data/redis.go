@@ -42,3 +42,7 @@ func (r *IdiomRepo) SetRedisKey(ctx context.Context, key string, value interface
 func (r *IdiomRepo) GetRedisKey(ctx context.Context, key string) (interface{}, error) {
 	return r.data.rdb.Get(ctx, key).Result()
 }
+
+func (r *IdiomRepo) DeleteRedisKey(ctx context.Context, key string) error {
+	return r.data.rdb.Del(ctx, key).Err()
+}

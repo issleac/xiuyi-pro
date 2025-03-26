@@ -16,17 +16,21 @@ const (
 // GetRanking 获取排行榜
 func (s *Service) GetRanking(ctx context.Context, req *pb.GetRankingReq) (resp *pb.GetRankingResp, err error) {
 	resp = new(pb.GetRankingResp)
-	if req.RoomId == 0 {
-		s.log.Warn("GetRanking req.RoomId is 0")
-		req.RoomId = _defaultRoomId
-	}
-	if req.Limit == 0 {
-		s.log.Error("GetRanking req.Limit is 0")
+	if req.RoomId == 0 || req.Limit == 0 {
+		s.log.WithContext(ctx).Warn("GetRanking req.RoomId is 0")
 		return nil, errors.BadRequest("Invalid parameters", "GetRanking")
 	}
 	s.log.WithContext(ctx).Infof("GetRanking req(%+v)", req)
+	var (
+		gameId string
+	)
+	// room_id -> game_id
+	if gameId, err = s.repo.GetRoomGame(ctx, req.RoomId); err != nil {
+		s.log.WithContext(ctx).Errorf("GetIdiom GetRoomGame err(%+v)", err)
+		return
+	}
 	// 从redis中获取排行榜
-	res, err := s.repo.GetTopRanking(ctx, req.RoomId, int64(req.Limit))
+	res, err := s.repo.GetTopRanking(ctx, gameId, int64(req.Limit))
 	if err != nil {
 		s.log.WithContext(ctx).Errorf("GetRanking GetTopRanking err(%+v)", err)
 		return
@@ -46,11 +50,8 @@ func (s *Service) GetRanking(ctx context.Context, req *pb.GetRankingReq) (resp *
 // UpdateRanking 更新排行榜
 func (s *Service) UpdateRanking(ctx context.Context, req *pb.UpdateRankingReq) (resp *emptypb.Empty, err error) {
 	resp = new(emptypb.Empty)
-	if req.RoomId == 0 || req.Viewer == nil {
-		s.log.Warn("GetRanking req(%+v) invalid", req)
-		req.RoomId = _defaultRoomId
-	}
-	if req.Viewer.Uid == "" {
+	if req.GetGameId() == "" || req.Viewer == nil || req.Viewer.Uid == "" {
+		s.log.WithContext(ctx).Errorf("UpdateRanking req.GameId is nil, req(%+v)", req)
 		return nil, errors.BadRequest("Invalid parameters", "UpdateRanking")
 	}
 	// 更新redis信息
@@ -59,8 +60,8 @@ func (s *Service) UpdateRanking(ctx context.Context, req *pb.UpdateRankingReq) (
 		Face: req.Viewer.Face,
 		Name: req.Viewer.Name,
 	}
-	if err = s.repo.UpsertRanking(ctx, req.RoomId, viewer, _gameExpireTime); err != nil {
-		s.log.WithContext(ctx).Errorf("UpdateRanking UpsertRanking err(%+v)", err)
+	if err = s.repo.UpsertRanking(ctx, req.GetGameId(), viewer, _gameExpireTime); err != nil {
+		s.log.WithContext(ctx).Errorf("UpdateRanking UpsertRanking gameId(%d)|viewer(%+v) err(%+v)", req.GetGameId(), viewer, err)
 		return
 	}
 	return

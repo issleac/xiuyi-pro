@@ -57,7 +57,7 @@ func (r *IdiomRepo) FindByID(ctx context.Context, id int64) (*biz.Idiom, error) 
 	}, nil
 }
 
-func (r *IdiomRepo) FindByNextID(ctx context.Context, id int64) (*biz.Idiom, error) {
+func (r *IdiomRepo) FindByGTEID(ctx context.Context, id int64) (*biz.Idiom, error) {
 	p, err := r.data.db.Idiom.Query().Where(idiom.IDGTE(id)).First(ctx) // ID >= id
 	if err != nil {
 		r.log.Error(err)

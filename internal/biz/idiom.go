@@ -38,7 +38,7 @@ type IdiomRepo interface {
 	Save(context.Context, *Idiom) (*Idiom, error)
 	Update(context.Context, *Idiom) (*Idiom, error)
 	FindByID(context.Context, int64) (*Idiom, error)
-	FindByNextID(context.Context, int64) (*Idiom, error)
+	FindByGTEID(context.Context, int64) (*Idiom, error)
 	ListAll(context.Context) ([]*Idiom, error)
 	SaveBatch(context.Context, []*Idiom) ([]*Idiom, error)
 	ListByPage(context.Context, int32, int32, *Idiom) ([]*Idiom, int32, error)
@@ -46,6 +46,7 @@ type IdiomRepo interface {
 	UpsertRanking(context.Context, string, *ViewerRanking, int64) error
 	SetRedisKey(context.Context, string, interface{}, int64) error
 	GetRedisKey(context.Context, string) (interface{}, error)
+	DeleteRedisKey(context.Context, string) error
 }
 
 // IdiomUsecase is an Idiom usecase.
@@ -70,8 +71,8 @@ func roomGameKey(roomId int64) string {
 	return fmt.Sprintf("room_game_%d", roomId)
 }
 
-func rankingKey(id int64) string {
-	return fmt.Sprintf("room_ranking_%d", id)
+func rankingKey(id string) string {
+	return fmt.Sprintf("game_ranking_%s", id)
 }
 
 func giftViewKey(gameId, uid string) string {
@@ -97,16 +98,16 @@ func (uc *IdiomUsecase) FindByID(ctx context.Context, id int64) (*Idiom, error) 
 	return uc.repo.FindByID(ctx, id)
 }
 
-func (uc *IdiomUsecase) FindByNextID(ctx context.Context, id int64) (*Idiom, error) {
-	return uc.repo.FindByNextID(ctx, id)
+func (uc *IdiomUsecase) FindByGTEID(ctx context.Context, id int64) (*Idiom, error) {
+	return uc.repo.FindByGTEID(ctx, id)
 }
 
-func (uc *IdiomUsecase) GetTopRanking(ctx context.Context, roomId, limit int64) ([]*ViewerRanking, error) {
-	return uc.repo.GetTopRanking(ctx, rankingKey(roomId), limit)
+func (uc *IdiomUsecase) GetTopRanking(ctx context.Context, gameId string, limit int64) ([]*ViewerRanking, error) {
+	return uc.repo.GetTopRanking(ctx, rankingKey(gameId), limit)
 }
 
-func (uc *IdiomUsecase) UpsertRanking(ctx context.Context, roomId int64, viewer *ViewerRanking, timeout int64) error {
-	return uc.repo.UpsertRanking(ctx, rankingKey(roomId), viewer, timeout)
+func (uc *IdiomUsecase) UpsertRanking(ctx context.Context, gameId string, viewer *ViewerRanking, timeout int64) error {
+	return uc.repo.UpsertRanking(ctx, rankingKey(gameId), viewer, timeout)
 }
 
 func (uc *IdiomUsecase) SetGameIdiom(ctx context.Context, gameId string, idiomId int64, answer string, timeout int64) error {
@@ -121,7 +122,8 @@ func (uc *IdiomUsecase) GetGameIdiom(ctx context.Context, gameId string) (*Idiom
 	if err != nil {
 		return nil, err
 	}
-	return res.(*IdiomAnswer), nil
+	answer, _ := res.(*IdiomAnswer)
+	return answer, nil
 }
 
 func (uc *IdiomUsecase) SetRoomGame(ctx context.Context, roomId int64, gameId string, timeout int64) (err error) {
@@ -133,7 +135,12 @@ func (uc *IdiomUsecase) GetRoomGame(ctx context.Context, roomId int64) (string, 
 	if err != nil {
 		return "", err
 	}
-	return res.(string), nil
+	str, _ := res.(string)
+	return str, nil
+}
+
+func (uc *IdiomUsecase) DelRoomGame(ctx context.Context, roomId int64) error {
+	return uc.repo.DeleteRedisKey(ctx, roomGameKey(roomId))
 }
 
 func (uc *IdiomUsecase) SetGameGiftView(ctx context.Context, gameId string, uid string, timeout int64) error {

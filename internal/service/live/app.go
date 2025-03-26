@@ -20,7 +20,7 @@ func StartApp(c context.Context, key, secret, host, code string, appId int64) (r
 	}
 	reqJson, err := json.Marshal(startAppReq)
 	if err != nil {
-		log.Error("StartApp err:", err)
+		log.Errorf("StartApp req(%+v) resp(%+v) err(%+v)", startAppReq, reqJson, err)
 		return
 	}
 	return ApiRequest(c, key, secret, host, _startPath, string(reqJson))
@@ -33,7 +33,7 @@ func AppHeart(c context.Context, key, secret, host, gameId string) (resp BaseRes
 	}
 	reqJson, err := json.Marshal(appHeartbeatReq)
 	if err != nil {
-		log.Error("AppHeart err:", err)
+		log.Errorf("AppHeart req(%+v) resp(%+v) err(%+v)", appHeartbeatReq, reqJson, err)
 		return
 	}
 	return ApiRequest(c, key, secret, host, _heartPath, string(reqJson))
@@ -47,7 +47,7 @@ func EndApp(c context.Context, key, secret, host, gameId string, appId int64) (r
 	}
 	reqJson, err := json.Marshal(endAppReq)
 	if err != nil {
-		log.Error("EndApp err:", err)
+		log.Errorf("EndApp req(%+v) resp(%+v) err(%+v)", endAppReq, reqJson, err)
 		return
 	}
 	return ApiRequest(c, key, secret, host, _endPath, string(reqJson))

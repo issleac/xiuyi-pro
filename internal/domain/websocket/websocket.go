@@ -41,6 +41,7 @@ func (w *Websocket) StartWebsocket(c context.Context, wsAddr, authBody string, d
 		return
 	}
 
+	// todo: 结束后回收goroutine
 	// 读取信息
 	go w.ws.ReadMsg()
 

@@ -81,7 +81,7 @@ func (s *Service) handleDm(ctx context.Context, data *live.OpenPlatformDM) (err 
 	s.log.WithContext(ctx).Info("handleDm user answer right, data(%+v)", data)
 	// 加分
 	if _, err = s.UpdateRanking(ctx, &pb.UpdateRankingReq{
-		RoomId: data.RoomId,
+		GameId: gameId,
 		Viewer: &pb.Viewer{
 			Uid:  data.OpenId,
 			Face: data.Uface,

@@ -39,17 +39,19 @@ message StartAppReq {
 }
 
 message EndAppReq {
+  // 直播间ID
+  int64 room_id = 1 [(validate.rules).int64 = {gt: 1}];
   // 游戏ID
-  string game_id = 1 [(validate.rules).string = {min_len: 1}];
+  string game_id = 2;
 }
 
 message UpdateRankingReq {
-  int64 roomId = 1;
+  string game_id = 1;
   Viewer viewer = 2;
 }
 
 message GetRankingReq {
-  int64 roomId = 1;
+  int64 room_id = 1; // @inject_tag: form:"room_id"
   int32 limit = 2; // @inject_tag: form:"limit"
 }
 

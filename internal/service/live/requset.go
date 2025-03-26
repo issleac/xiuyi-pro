@@ -40,7 +40,7 @@ func ApiRequest(c context.Context, accessKey, accessSecret, host, requestUrl, re
 	cliResp := cli.Send().Scan(&resp)
 	if !cliResp.OK() {
 		err = errors.Wrapf(cliResp.Error(), "[error] req:%+v resp:%+v", reqJson, resp)
-		log.Error("ApiRequest err:", err)
+		log.Errorf("ApiRequest cli(%+v) cliResp(%+v) err(%+v)", cli, cliResp, err)
 		return
 	}
 	return
