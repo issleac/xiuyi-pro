@@ -19,7 +19,8 @@ const (
 	BiliSignVersionHeader     = "x-bili-signature-version"
 	BiliContentMD5Header      = "x-bili-content-md5"
 
-	OpenLiveCmdDm = "LIVE_OPEN_PLATFORM_DM"
+	OpenLiveCmdDm   = "LIVE_OPEN_PLATFORM_DM"
+	OpenLiveCmdGift = "LIVE_OPEN_PLATFORM_SEND_GIFT"
 )
 
 type CommonHeader struct {
@@ -118,4 +119,37 @@ type OpenPlatformDM struct {
 	ReplyOpenId            string `json:"reply_open_id"`
 	ReplyUname             string `json:"reply_uname"`
 	IsAdmin                int    `json:"is_admin"`
+}
+
+type OpenPlatformGift struct {
+	RoomId                 int64  `json:"room_id"`
+	Uid                    int64  `json:"uid"`
+	OpenId                 string `json:"open_id"`
+	Uname                  string `json:"uname"`
+	Uface                  string `json:"uface"`
+	GiftId                 int    `json:"gift_id"`
+	GiftName               string `json:"gift_name"`
+	GiftNum                int    `json:"gift_num"`
+	Price                  int    `json:"price"`
+	Paid                   bool   `json:"paid"`
+	FansMedalLevel         int    `json:"fans_medal_level"`
+	FansMedalName          string `json:"fans_medal_name"`
+	FansMedalWearingStatus bool   `json:"fans_medal_wearing_status"`
+	GuardLevel             int    `json:"guard_level"`
+	Timestamp              int    `json:"timestamp"`
+	MsgId                  string `json:"msg_id"`
+	AnchorInfo             struct {
+		Uid    int    `json:"uid"`
+		OpenId string `json:"open_id"`
+		Uname  string `json:"uname"`
+		Uface  string `json:"uface"`
+	} `json:"anchor_info"`
+	GiftIcon  string `json:"gift_icon"`
+	ComboGift bool   `json:"combo_gift"`
+	ComboInfo struct {
+		ComboBaseNum int    `json:"combo_base_num"`
+		ComboCount   int    `json:"combo_count"`
+		ComboId      string `json:"combo_id"`
+		ComboTimeout int    `json:"combo_timeout"`
+	} `json:"combo_info"`
 }

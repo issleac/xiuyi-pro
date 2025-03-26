@@ -5,6 +5,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"xiuyiPro/internal/biz"
 	"xiuyiPro/internal/data/ent"
+	"xiuyiPro/internal/data/ent/idiom"
 )
 
 type IdiomRepo struct {
@@ -54,6 +55,26 @@ func (r *IdiomRepo) FindByID(ctx context.Context, id int64) (*biz.Idiom, error) 
 		CreatedAt:  p.Ctime,
 		UpdatedAt:  p.Mtime,
 	}, nil
+}
+
+func (r *IdiomRepo) FindByNextID(ctx context.Context, id int64) (*biz.Idiom, error) {
+	p, err := r.data.db.Idiom.Query().Where(idiom.IDGTE(id)).First(ctx) // ID >= id
+	if err != nil {
+		r.log.Error(err)
+		return nil, err
+	}
+	return &biz.Idiom{
+		ID:         p.ID,
+		Iid:        p.Iid,
+		Answer:     p.Answer,
+		Image:      p.Image,
+		Difficulty: p.Difficulty,
+		Creator:    p.Creator,
+		State:      p.State,
+		CreatedAt:  p.Ctime,
+		UpdatedAt:  p.Mtime,
+	}, nil
+
 }
 
 func (r *IdiomRepo) ListAll(ctx context.Context) ([]*biz.Idiom, error) {

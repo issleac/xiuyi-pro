@@ -33,7 +33,7 @@ message StartAppResp {
 
 message StartAppReq {
   // 直播间ID
-  string room_id = 1;
+  int64 room_id = 1;
   // 开播主播的身份码
   string up_code_id = 2 [(validate.rules).string = {min_len: 1}];
 }

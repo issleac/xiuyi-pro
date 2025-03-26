@@ -75,3 +75,37 @@ func updateRanking(c *gin.Context) {
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
 }
+
+func startGame(c *gin.Context) {
+	var (
+		req = new(pb.StartAppReq)
+	)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	resp, err := iSvr.StartApp(c, req)
+	if err != nil {
+		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		return
+	}
+	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
+}
+
+func endGame(c *gin.Context) {
+	var (
+		req = new(pb.EndAppReq)
+	)
+	err := c.ShouldBindJSON(req)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	resp, err := iSvr.EndApp(c, req)
+	if err != nil {
+		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		return
+	}
+	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
+}

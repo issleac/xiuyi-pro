@@ -13,21 +13,17 @@ import (
 
 func (s *Service) StartApp(ctx context.Context, req *pb.StartAppReq) (resp *pb.StartAppResp, err error) {
 	resp = new(pb.StartAppResp)
-	if req == nil || len(req.GetUpCodeId()) == 0 {
+	if req == nil || len(req.GetUpCodeId()) == 0 || req.GetRoomId() <= 0 {
 		return resp, errors.BadRequest("参数错误", "StartApp")
 	}
 	s.log.WithContext(ctx).Infof("StartApp req(%+v)", req)
 	var (
-		gameId string
-		game   = &live.RoomGame{
-			RoomId:   req.GetRoomId(),
-			UpCodeId: req.GetUpCodeId(),
-		}
 		startAppRespData = new(live.StartAppRespData)
 		key, secret      = s.cfg.GetLive().GetAccessKey(), s.cfg.GetLive().GetAccessSecret()
 		appId            = s.cfg.GetLive().AppId
 		host             = s.cfg.GetLive().GetHost()
 	)
+	// 开启app
 	sResp, err := live.StartApp(ctx, key, secret, host, req.UpCodeId, appId)
 	if err != nil {
 		s.log.WithContext(ctx).Errorf("StartApp s.liveDao.StartApp err(%+v)", err)
@@ -63,9 +59,13 @@ func (s *Service) StartApp(ctx context.Context, req *pb.StartAppReq) (resp *pb.S
 		s.log.WithContext(ctx).Error("StartApp ws.StartWebsocket err(%+v)", err)
 		return
 	}
-	game.Ws = ws
 
-	s.rooms.Store(gameId, game)
+	// 保存房间信息
+	if err = s.repo.SetGameRoom(ctx, req.RoomId, startAppRespData.GameInfo.GameId, _gameExpireTime); err != nil {
+		s.log.WithContext(ctx).Errorf("StartApp s.repo.SetGameRoom err(%+v)", err)
+		return
+	}
+	resp.GameId = startAppRespData.GameInfo.GameId
 	return
 }
 
@@ -81,5 +81,15 @@ func (s *Service) EndApp(ctx context.Context, req *pb.EndAppReq) (resp *emptypb.
 	}
 	s.rooms.Delete(req.GetGameId())
 	// todo：进程关闭，回收goroutine
+	var (
+		key, secret = s.cfg.GetLive().GetAccessKey(), s.cfg.GetLive().GetAccessSecret()
+		appId       = s.cfg.GetLive().AppId
+		host        = s.cfg.GetLive().GetHost()
+	)
+	_, err = live.EndApp(ctx, key, secret, host, req.GetGameId(), appId)
+	if err != nil {
+		s.log.WithContext(ctx).Errorf("EndApp s.liveDao.EndApp err(%+v)", err)
+		return nil, err
+	}
 	return
 }

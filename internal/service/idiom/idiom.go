@@ -69,14 +69,35 @@ func (s *Service) GetIdiom(ctx context.Context, req *pb.GetIdiomReq) (resp *pb.G
 	}
 	s.log.WithContext(ctx).Infof("GetIdiom req(%+v)", req)
 	var (
-		idiom *biz.Idiom
+		idiom     *biz.Idiom
+		gameId    string
+		lastIdiom *biz.IdiomAnswer
 	)
-	if idiom, err = s.repo.FindByID(ctx, req.Id); err != nil {
+	// roomId -> gameId
+	if gameId, err = s.repo.GetRoomGame(ctx, req.RoomId); err != nil {
+		s.log.WithContext(ctx).Errorf("GetIdiom GetRoomGame err(%+v)", err)
+		return
+	}
+	// 获取下一个题目
+	if req.Id == 0 {
+		lastIdiom, err = s.repo.GetGameIdiom(ctx, gameId)
+		if err != nil {
+			s.log.WithContext(ctx).Errorf("GetIdiom GetGameIdiom err(%+v)", err)
+			return nil, err
+		}
+		if lastIdiom == nil {
+			req.Id = 1
+		} else {
+			req.Id = lastIdiom.IdiomId + 1
+		}
+		s.log.WithContext(ctx).Infof("GetIdiom GetGameIdiom lastIdiom(%+v) req.Id(%+v)", lastIdiom, req.Id)
+	}
+	if idiom, err = s.repo.FindByNextID(ctx, req.Id); err != nil {
 		s.log.WithContext(ctx).Errorf("GetIdiom FindByID err(%+v)", err) //todo:404
 		return
 	}
 	// 当前房间游戏绑定题目
-	if err = s.repo.SetGameAnswer(ctx, req.RoomId, idiom.Answer, _gameExpireTime); err != nil {
+	if err = s.repo.SetGameIdiom(ctx, gameId, idiom.ID, idiom.Answer, _gameExpireTime); err != nil {
 		s.log.WithContext(ctx).Errorf("GetIdiom SetGameAnswer err(%+v)", err)
 		return
 	}

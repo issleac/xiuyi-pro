@@ -68,12 +68,17 @@ func outerRouter(router *gin.Engine) {
 		t.GET("/list", listTurtles)
 		t.POST("/set/batch", setBatchTurtles)
 	}
-	i := router.Group("/x/idiom")
+	i := router.Group("/x/idiom") //todo：鉴权
 	{
 		i.GET("/get", getIdiom)
-		i.POST("/set/batch", setIdioms)
 		i.GET("/ranking", getRanking)
 		i.POST("/update/ranking", updateRanking)
+		i.POST("/start/game", startGame)
+		i.POST("/end/game", endGame)
+	}
+	inner := router.Group("/x/inner/idiom") //todo：鉴权
+	{
+		inner.POST("/set/batch", setIdioms)
 	}
 }
 
