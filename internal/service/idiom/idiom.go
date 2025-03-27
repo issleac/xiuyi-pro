@@ -6,7 +6,6 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"math/rand"
-	"sync"
 	"time"
 	pb "xiuyiPro/api/idiom/v1"
 	"xiuyiPro/errorcode"
@@ -18,10 +17,9 @@ const _defaultRoomId = 1219
 
 type Service struct {
 	pb.UnimplementedIdiomServer
-	repo  *biz.IdiomUsecase
-	log   *log.Helper
-	cfg   *conf.Application
-	rooms sync.Map
+	repo *biz.IdiomUsecase
+	log  *log.Helper
+	cfg  *conf.Application
 }
 
 func NewIdiomService(cfg *conf.Application, repo *biz.IdiomUsecase, logger log.Logger) *Service {

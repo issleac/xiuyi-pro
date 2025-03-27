@@ -49,13 +49,22 @@ func (s *Service) StartApp(ctx context.Context, req *pb.StartAppReq) (resp *pb.S
 	}
 
 	// 保持心跳
-	// todo：暂停心跳，回收goroutine
-	go func(ctx context.Context, gameId string) {
+	gCtx, cancel := context.WithCancel(context.Background())
+	if err = s.repo.SetGameCancelFunc(gCtx, startAppRespData.GameInfo.GameId, cancel, _gameExpireTime); err != nil {
+		s.log.WithContext(gCtx).Errorf("StartApp s.repo.SetGameCancelFunc err(%+v)", err)
+		err = errorcode.ServiceError
+		return
+	}
+	go func(gCtx context.Context, gameId string) {
 		for {
-			time.Sleep(time.Second * 20)
-			_, _ = live.AppHeart(ctx, key, secret, host, gameId)
+			select {
+			case <-gCtx.Done():
+				return
+			case <-time.After(time.Second * 20):
+				_, _ = live.AppHeart(gCtx, key, secret, host, gameId)
+			}
 		}
-	}(context.Background(), startAppRespData.GameInfo.GameId)
+	}(gCtx, startAppRespData.GameInfo.GameId)
 
 	// 开启长连
 	ws, err := websocket.New(s.log)
@@ -64,7 +73,7 @@ func (s *Service) StartApp(ctx context.Context, req *pb.StartAppReq) (resp *pb.S
 		err = errorcode.CreateWsFailed
 		return
 	}
-	err = ws.StartWebsocket(ctx, startAppRespData.WebsocketInfo.WssLink[0], startAppRespData.WebsocketInfo.AuthBody, s.handleMsg)
+	err = ws.StartWebsocket(ctx, gCtx, startAppRespData.WebsocketInfo.WssLink[0], startAppRespData.WebsocketInfo.AuthBody, s.handleMsg)
 	if err != nil {
 		s.log.WithContext(ctx).Error("StartApp ws.StartWebsocket err(%+v)", err)
 		err = errorcode.CreateWsFailed
@@ -116,6 +125,13 @@ func (s *Service) EndApp(ctx context.Context, req *pb.EndAppReq) (resp *emptypb.
 		err = errorcode.ServiceError
 		return
 	}
-	// todo：进程关闭，回收goroutine
+	// 回收goroutine
+	cancel, err := s.repo.GetGameCancelFunc(ctx, gameId)
+	if err != nil || cancel == nil {
+		s.log.WithContext(ctx).Errorf("EndApp s.repo.GetGameCancelFunc err(%+v)", err)
+		err = errorcode.ServiceError
+		return
+	}
+	cancel()
 	return
 }

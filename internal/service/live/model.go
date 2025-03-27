@@ -19,8 +19,9 @@ const (
 	BiliSignVersionHeader     = "x-bili-signature-version"
 	BiliContentMD5Header      = "x-bili-content-md5"
 
-	OpenLiveCmdDm   = "LIVE_OPEN_PLATFORM_DM"
-	OpenLiveCmdGift = "LIVE_OPEN_PLATFORM_SEND_GIFT"
+	OpenLiveCmdDm    = "LIVE_OPEN_PLATFORM_DM"
+	OpenLiveCmdGift  = "LIVE_OPEN_PLATFORM_SEND_GIFT"
+	OpenLiveCmdClose = "LIVE_OPEN_PLATFORM_INTERACTION_END"
 )
 
 type CommonHeader struct {

@@ -12,7 +12,7 @@ import (
 )
 
 // StartWebsocket 启动长连
-func (w *Websocket) StartWebsocket(c context.Context, wsAddr, authBody string, doMsg protoLogic) (err error) {
+func (w *Websocket) StartWebsocket(c context.Context, gCtx context.Context, wsAddr, authBody string, doMsg protoLogic) (err error) {
 	w.log.WithContext(c).Info("StartWebsocket wsAddr:", wsAddr)
 	// 建立连接
 	conn, _, err := websocket.DefaultDialer.Dial(wsAddr, nil)
@@ -41,54 +41,61 @@ func (w *Websocket) StartWebsocket(c context.Context, wsAddr, authBody string, d
 		return
 	}
 
-	// todo: 结束后回收goroutine
+	// todo: 结束后需要主动回收goroutine嘛？
 	// 读取信息
-	go w.ws.ReadMsg()
+	go w.ws.ReadMsg(gCtx)
 
 	// 处理信息
-	go w.ws.DoEvent()
+	go w.ws.DoEvent(gCtx)
 
 	return
 }
 
 // ReadMsg 读取长连信息
-func (wc *WebsocketClient) ReadMsg() {
+func (wc *WebsocketClient) ReadMsg(c context.Context) {
 	for {
-		retProto := &Proto{}
-		_, buf, err := wc.conn.ReadMessage()
-		if err != nil {
-			fmt.Println(err)
-			continue
+		select {
+		case <-c.Done():
+			return
+		default:
+			retProto := &Proto{}
+			_, buf, err := wc.conn.ReadMessage()
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			retProto.PacketLength = int32(binary.BigEndian.Uint32(buf[PackOffset:HeaderOffset]))
+			retProto.HeaderLength = int16(binary.BigEndian.Uint16(buf[HeaderOffset:VerOffset]))
+			retProto.Version = int16(binary.BigEndian.Uint16(buf[VerOffset:OperationOffset]))
+			retProto.Operation = int32(binary.BigEndian.Uint32(buf[OperationOffset:SeqIdOffset]))
+			retProto.SequenceId = int32(binary.BigEndian.Uint32(buf[SeqIdOffset:]))
+			if retProto.PacketLength < 0 || retProto.PacketLength > MaxPackSize {
+				continue
+			}
+			if retProto.HeaderLength != RawHeaderSize {
+				continue
+			}
+			if bodyLen := int(retProto.PacketLength - int32(retProto.HeaderLength)); bodyLen > 0 {
+				retProto.Body = buf[retProto.HeaderLength:retProto.PacketLength]
+			} else {
+				continue
+			}
+			retProto.BodyMuti = [][]byte{retProto.Body}
+			if len(retProto.BodyMuti) > 0 {
+				retProto.Body = retProto.BodyMuti[0]
+			}
+			wc.msgBuf <- retProto
 		}
-		retProto.PacketLength = int32(binary.BigEndian.Uint32(buf[PackOffset:HeaderOffset]))
-		retProto.HeaderLength = int16(binary.BigEndian.Uint16(buf[HeaderOffset:VerOffset]))
-		retProto.Version = int16(binary.BigEndian.Uint16(buf[VerOffset:OperationOffset]))
-		retProto.Operation = int32(binary.BigEndian.Uint32(buf[OperationOffset:SeqIdOffset]))
-		retProto.SequenceId = int32(binary.BigEndian.Uint32(buf[SeqIdOffset:]))
-		if retProto.PacketLength < 0 || retProto.PacketLength > MaxPackSize {
-			continue
-		}
-		if retProto.HeaderLength != RawHeaderSize {
-			continue
-		}
-		if bodyLen := int(retProto.PacketLength - int32(retProto.HeaderLength)); bodyLen > 0 {
-			retProto.Body = buf[retProto.HeaderLength:retProto.PacketLength]
-		} else {
-			continue
-		}
-		retProto.BodyMuti = [][]byte{retProto.Body}
-		if len(retProto.BodyMuti) > 0 {
-			retProto.Body = retProto.BodyMuti[0]
-		}
-		wc.msgBuf <- retProto
 	}
 }
 
 // DoEvent 处理信息
-func (wc *WebsocketClient) DoEvent() {
+func (wc *WebsocketClient) DoEvent(c context.Context) {
 	ticker := time.NewTicker(time.Second * 5)
 	for {
 		select {
+		case <-c.Done():
+			return
 		case p := <-wc.msgBuf:
 			if p == nil {
 				continue

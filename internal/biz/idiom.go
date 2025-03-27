@@ -81,6 +81,10 @@ func giftViewKey(gameId, uid string) string {
 	return fmt.Sprintf("gift_game_%s_uid_%s", gameId, uid)
 }
 
+func gameCancelFuncKey(gameId string) string {
+	return fmt.Sprintf("game_cancel_func_%s", gameId)
+}
+
 // CreateIdiom creates an Idiom, and returns the new Idiom.
 func (uc *IdiomUsecase) CreateIdiom(ctx context.Context, i *Idiom) (*Idiom, error) {
 	return uc.repo.Save(ctx, i)
@@ -175,4 +179,20 @@ func (uc *IdiomUsecase) GetGameGiftView(ctx context.Context, gameId string, uid 
 		return false, err
 	}
 	return res != nil, nil
+}
+
+func (uc *IdiomUsecase) SetGameCancelFunc(ctx context.Context, gameId string, f context.CancelFunc, timeout int64) error {
+	return uc.repo.SetRedisKey(ctx, gameCancelFuncKey(gameId), f, timeout)
+}
+
+func (uc *IdiomUsecase) GetGameCancelFunc(ctx context.Context, gameId string) (f context.CancelFunc, err error) {
+	res, err := uc.repo.GetRedisKey(ctx, gameCancelFuncKey(gameId))
+	if err != nil {
+		if err == redis.Nil {
+			return nil, nil
+		}
+		return nil, err
+	}
+	f, _ = res.(context.CancelFunc)
+	return f, nil
 }

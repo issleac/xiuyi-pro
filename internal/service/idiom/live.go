@@ -41,6 +41,9 @@ func (s *Service) handleMsg(msg *websocket.Proto) (err error) {
 				return
 			}
 			return s.handleGift(context.Background(), data)
+		case live.OpenLiveCmdClose:
+			// 关闭
+			s.log.Warn("handleMsg close!!!")
 		}
 	}
 	return
