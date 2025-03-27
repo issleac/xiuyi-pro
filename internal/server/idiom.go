@@ -18,7 +18,7 @@ func getIdiom(c *gin.Context) {
 	}
 	resp, err := iSvr.GetIdiom(c, req)
 	if err != nil {
-		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		c.JSON(httpNet.StatusOK, err)
 		return
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
@@ -36,7 +36,7 @@ func setIdioms(c *gin.Context) {
 	}
 	resp, err := iSvr.SetIdiomBatch(c, req)
 	if err != nil {
-		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		c.JSON(httpNet.StatusOK, err)
 		return
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
@@ -53,7 +53,7 @@ func getRanking(c *gin.Context) {
 	}
 	resp, err := iSvr.GetRanking(c, req)
 	if err != nil {
-		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		c.JSON(httpNet.StatusOK, err)
 		return
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
@@ -70,7 +70,7 @@ func updateRanking(c *gin.Context) {
 	}
 	resp, err := iSvr.UpdateRanking(c, req)
 	if err != nil {
-		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		c.JSON(httpNet.StatusOK, err)
 		return
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
@@ -87,7 +87,7 @@ func startGame(c *gin.Context) {
 	}
 	resp, err := iSvr.StartApp(c, req)
 	if err != nil {
-		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		c.JSON(httpNet.StatusOK, err)
 		return
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
@@ -104,7 +104,7 @@ func endGame(c *gin.Context) {
 	}
 	resp, err := iSvr.EndApp(c, req)
 	if err != nil {
-		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		c.JSON(httpNet.StatusOK, err)
 		return
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))

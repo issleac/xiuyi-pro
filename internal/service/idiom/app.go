@@ -3,10 +3,10 @@ package idiom
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-kratos/kratos/v2/errors"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"time"
 	pb "xiuyiPro/api/idiom/v1"
+	"xiuyiPro/errorcode"
 	"xiuyiPro/internal/domain/websocket"
 	"xiuyiPro/internal/service/live"
 )
@@ -14,7 +14,7 @@ import (
 func (s *Service) StartApp(ctx context.Context, req *pb.StartAppReq) (resp *pb.StartAppResp, err error) {
 	resp = new(pb.StartAppResp)
 	if req == nil || len(req.GetUpCodeId()) == 0 || req.GetRoomId() <= 0 {
-		return resp, errors.BadRequest("参数错误", "StartApp") //todo：错误码
+		return resp, errorcode.ParamInvalid
 	}
 	s.log.WithContext(ctx).Infof("StartApp req(%+v)", req)
 	var (
@@ -27,22 +27,24 @@ func (s *Service) StartApp(ctx context.Context, req *pb.StartAppReq) (resp *pb.S
 	sResp, err := live.StartApp(ctx, key, secret, host, req.UpCodeId, appId)
 	if err != nil {
 		s.log.WithContext(ctx).Errorf("StartApp s.liveDao.StartApp key(%s)|secret(%s) err(%+v)", key, secret, err)
+		err = errorcode.StartAppFailed
 		return
 	}
 	// 解析返回值
 	err = json.Unmarshal(sResp.Data, startAppRespData)
 	if err != nil {
 		s.log.WithContext(ctx).Errorf("StartApp json.Unmarshal err(%+v)", err)
+		err = errorcode.StartAppFailed
 		return
 	}
 	if startAppRespData == nil {
-		err = errors.New(500, "StartApp startAppRespData is nil", "") //todo：错误码
 		s.log.WithContext(ctx).Error("StartApp startAppRespData is nil")
+		err = errorcode.StartAppFailed
 		return
 	}
 	if len(startAppRespData.WebsocketInfo.WssLink) == 0 {
-		err = errors.New(500, "StartApp startAppRespData.WebsocketInfo.WssLink is nil", "") //todo：错误码
 		s.log.WithContext(ctx).Error("StartApp startAppRespData.WebsocketInfo.WssLink is nil")
+		err = errorcode.StartAppFailed
 		return
 	}
 
@@ -59,17 +61,20 @@ func (s *Service) StartApp(ctx context.Context, req *pb.StartAppReq) (resp *pb.S
 	ws, err := websocket.New(s.log)
 	if err != nil {
 		s.log.WithContext(ctx).Error("StartApp websocket.New err(%+v)", err)
+		err = errorcode.CreateWsFailed
 		return
 	}
 	err = ws.StartWebsocket(ctx, startAppRespData.WebsocketInfo.WssLink[0], startAppRespData.WebsocketInfo.AuthBody, s.handleMsg)
 	if err != nil {
 		s.log.WithContext(ctx).Error("StartApp ws.StartWebsocket err(%+v)", err)
+		err = errorcode.CreateWsFailed
 		return
 	}
 
 	// 保存房间信息
 	if err = s.repo.SetRoomGame(ctx, req.RoomId, startAppRespData.GameInfo.GameId, _gameExpireTime); err != nil {
 		s.log.WithContext(ctx).Errorf("StartApp s.repo.SetRoomGame err(%+v)", err)
+		err = errorcode.ServiceError
 		return
 	}
 	resp.GameId = startAppRespData.GameInfo.GameId
@@ -79,13 +84,19 @@ func (s *Service) StartApp(ctx context.Context, req *pb.StartAppReq) (resp *pb.S
 func (s *Service) EndApp(ctx context.Context, req *pb.EndAppReq) (resp *emptypb.Empty, err error) {
 	resp = new(emptypb.Empty)
 	if req == nil {
-		return resp, errors.BadRequest("参数错误", "EndApp") //todo：错误码
+		return nil, errorcode.ParamInvalid
 	}
 	s.log.WithContext(ctx).Infof("EndApp req(%+v)", req)
 	// room_id -> game_id
 	gameId, err := s.repo.GetRoomGame(ctx, req.GetRoomId())
 	if err != nil {
 		s.log.WithContext(ctx).Errorf("EndApp s.repo.GetRoomGame err(%+v)", err)
+		err = errorcode.ServiceError
+		return
+	}
+	if gameId == "" {
+		s.log.WithContext(ctx).Errorf("EndApp s.repo.GetRoomGame gameId(%s) err(%+v)", gameId, err)
+		err = errorcode.GameNotFound
 		return
 	}
 	var (
@@ -96,11 +107,13 @@ func (s *Service) EndApp(ctx context.Context, req *pb.EndAppReq) (resp *emptypb.
 	_, err = live.EndApp(ctx, key, secret, host, gameId, appId)
 	if err != nil {
 		s.log.WithContext(ctx).Errorf("EndApp s.liveDao.EndApp gameId(%s)|appId(%d) err(%+v)", gameId, appId, err)
-		return nil, err
+		err = errorcode.CloseAppFailed
+		return
 	}
 	// 删除房间信息
 	if err = s.repo.DelRoomGame(ctx, req.GetRoomId()); err != nil {
 		s.log.WithContext(ctx).Errorf("EndApp s.repo.DelRoomGame err(%+v)", err)
+		err = errorcode.ServiceError
 		return
 	}
 	// todo：进程关闭，回收goroutine

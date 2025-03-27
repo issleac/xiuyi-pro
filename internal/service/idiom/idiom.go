@@ -3,13 +3,13 @@ package idiom
 import (
 	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"math/rand"
 	"sync"
 	"time"
 	pb "xiuyiPro/api/idiom/v1"
+	"xiuyiPro/errorcode"
 	"xiuyiPro/internal/biz"
 	"xiuyiPro/internal/conf"
 )
@@ -39,7 +39,7 @@ func NewIdiomService(cfg *conf.Application, repo *biz.IdiomUsecase, logger log.L
 func (s *Service) SetIdiomBatch(ctx context.Context, req *pb.SetIdiomBatchReq) (resp *emptypb.Empty, err error) {
 	resp = new(emptypb.Empty)
 	if req == nil || len(req.Idioms) == 0 {
-		return resp, errors.BadRequest("Invalid parameters", "SetIdiomBatch")
+		return resp, errorcode.ParamInvalid
 	}
 	s.log.WithContext(ctx).Infof("SetIdiomBatch req(%+v)", req)
 	var (
@@ -57,6 +57,7 @@ func (s *Service) SetIdiomBatch(ctx context.Context, req *pb.SetIdiomBatchReq) (
 	}
 	if _, err = s.repo.CreateIdioms(ctx, idioms); err != nil {
 		s.log.WithContext(ctx).Errorf("SetIdiomBatch SaveBatch err(%+v)", err)
+		err = errorcode.ServiceError
 		return
 	}
 	return resp, nil
@@ -65,7 +66,7 @@ func (s *Service) SetIdiomBatch(ctx context.Context, req *pb.SetIdiomBatchReq) (
 func (s *Service) GetIdiom(ctx context.Context, req *pb.GetIdiomReq) (resp *pb.GetIdiomResp, err error) {
 	resp = new(pb.GetIdiomResp)
 	if req == nil || req.RoomId == 0 {
-		return nil, errors.BadRequest("Invalid parameters", "GetIdiomList")
+		return nil, errorcode.ParamInvalid
 	}
 	s.log.WithContext(ctx).Infof("GetIdiom req(%+v)", req)
 	var (
@@ -76,6 +77,12 @@ func (s *Service) GetIdiom(ctx context.Context, req *pb.GetIdiomReq) (resp *pb.G
 	// roomId -> gameId
 	if gameId, err = s.repo.GetRoomGame(ctx, req.RoomId); err != nil {
 		s.log.WithContext(ctx).Errorf("GetIdiom GetRoomGame err(%+v)", err)
+		err = errorcode.ServiceError
+		return
+	}
+	if gameId == "" {
+		s.log.WithContext(ctx).Errorf("GetIdiom GetRoomGame gameId(%s) err(%+v)", gameId, err)
+		err = errorcode.GameNotFound
 		return
 	}
 	// 获取下一个题目
@@ -84,7 +91,8 @@ func (s *Service) GetIdiom(ctx context.Context, req *pb.GetIdiomReq) (resp *pb.G
 		lastIdiom, err = s.repo.GetGameIdiom(ctx, gameId)
 		if err != nil {
 			s.log.WithContext(ctx).Errorf("GetIdiom GetGameIdiom err(%+v)", err)
-			return nil, err
+			err = errorcode.ServiceError
+			return
 		}
 		if lastIdiom == nil {
 			req.Id = 1
@@ -94,12 +102,27 @@ func (s *Service) GetIdiom(ctx context.Context, req *pb.GetIdiomReq) (resp *pb.G
 		s.log.WithContext(ctx).Infof("GetIdiom GetGameIdiom lastIdiom(%+v) req.Id(%+v)", lastIdiom, req.Id)
 	}
 	if idiom, err = s.repo.FindByGTEID(ctx, req.Id); err != nil {
-		s.log.WithContext(ctx).Errorf("GetIdiom FindByGTEID req.Id(%d) err(%+v)", req.Id, err) //todo:404
+		s.log.WithContext(ctx).Errorf("GetIdiom FindByGTEID req.Id(%d) err(%+v)", req.Id, err)
+		return
+	}
+	if idiom == nil {
+		// 循环找题目
+		req.Id = 1
+		if idiom, err = s.repo.FindByGTEID(ctx, req.Id); err != nil {
+			s.log.WithContext(ctx).Errorf("GetIdiom FindByGTEID req.Id(%d) err(%+v)", req.Id, err)
+			err = errorcode.ServiceError
+			return
+		}
+		if idiom == nil {
+			err = errorcode.NoAvailableIdiom
+			return
+		}
 		return
 	}
 	// 更新当前房间游戏绑定题目
 	if err = s.repo.SetGameIdiom(ctx, gameId, idiom.ID, idiom.Answer, _gameExpireTime); err != nil {
 		s.log.WithContext(ctx).Errorf("GetIdiom SetGameAnswer idiom(%+v) err(%+v)", idiom, err)
+		err = errorcode.ServiceError
 		return
 	}
 	resp.Idiom = &pb.Idiom{

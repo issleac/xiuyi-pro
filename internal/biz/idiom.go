@@ -2,8 +2,10 @@ package biz
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-redis/redis/v8"
 	"time"
 )
 
@@ -99,11 +101,25 @@ func (uc *IdiomUsecase) FindByID(ctx context.Context, id int64) (*Idiom, error) 
 }
 
 func (uc *IdiomUsecase) FindByGTEID(ctx context.Context, id int64) (*Idiom, error) {
-	return uc.repo.FindByGTEID(ctx, id)
+	res, err := uc.repo.FindByGTEID(ctx, id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return res, nil
 }
 
 func (uc *IdiomUsecase) GetTopRanking(ctx context.Context, gameId string, limit int64) ([]*ViewerRanking, error) {
-	return uc.repo.GetTopRanking(ctx, rankingKey(gameId), limit)
+	res, err := uc.repo.GetTopRanking(ctx, rankingKey(gameId), limit)
+	if err != nil {
+		if err == redis.Nil {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return res, nil
 }
 
 func (uc *IdiomUsecase) UpsertRanking(ctx context.Context, gameId string, viewer *ViewerRanking, timeout int64) error {
@@ -120,6 +136,9 @@ func (uc *IdiomUsecase) SetGameIdiom(ctx context.Context, gameId string, idiomId
 func (uc *IdiomUsecase) GetGameIdiom(ctx context.Context, gameId string) (*IdiomAnswer, error) {
 	res, err := uc.repo.GetRedisKey(ctx, gameIdiomKey(gameId))
 	if err != nil {
+		if err == redis.Nil {
+			return nil, nil
+		}
 		return nil, err
 	}
 	answer, _ := res.(*IdiomAnswer)
@@ -133,6 +152,9 @@ func (uc *IdiomUsecase) SetRoomGame(ctx context.Context, roomId int64, gameId st
 func (uc *IdiomUsecase) GetRoomGame(ctx context.Context, roomId int64) (string, error) {
 	res, err := uc.repo.GetRedisKey(ctx, roomGameKey(roomId))
 	if err != nil {
+		if err == redis.Nil {
+			return "", nil
+		}
 		return "", err
 	}
 	str, _ := res.(string)

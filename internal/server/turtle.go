@@ -18,7 +18,7 @@ func listTurtles(c *gin.Context) {
 	}
 	resp, err := tSvr.GetTurtleList(c, req)
 	if err != nil {
-		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		c.JSON(httpNet.StatusOK, err)
 		return
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))
@@ -36,7 +36,7 @@ func setBatchTurtles(c *gin.Context) {
 	}
 	resp, err := tSvr.SetTurtleBatch(c, req)
 	if err != nil {
-		c.JSON(httpNet.StatusOK, BuildErrorResponse(c, 0)) //todo:errCode
+		c.JSON(httpNet.StatusOK, err)
 		return
 	}
 	c.JSON(httpNet.StatusOK, BuildDataResponse(c, resp))

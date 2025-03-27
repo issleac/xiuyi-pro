@@ -2,9 +2,9 @@ package idiom
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/errors"
 	"google.golang.org/protobuf/types/known/emptypb"
 	pb "xiuyiPro/api/idiom/v1"
+	"xiuyiPro/errorcode"
 	"xiuyiPro/internal/biz"
 )
 
@@ -18,7 +18,7 @@ func (s *Service) GetRanking(ctx context.Context, req *pb.GetRankingReq) (resp *
 	resp = new(pb.GetRankingResp)
 	if req.RoomId == 0 || req.Limit == 0 {
 		s.log.WithContext(ctx).Warn("GetRanking req.RoomId is 0")
-		return nil, errors.BadRequest("Invalid parameters", "GetRanking")
+		return nil, errorcode.ParamInvalid
 	}
 	s.log.WithContext(ctx).Infof("GetRanking req(%+v)", req)
 	var (
@@ -27,12 +27,24 @@ func (s *Service) GetRanking(ctx context.Context, req *pb.GetRankingReq) (resp *
 	// room_id -> game_id
 	if gameId, err = s.repo.GetRoomGame(ctx, req.RoomId); err != nil {
 		s.log.WithContext(ctx).Errorf("GetIdiom GetRoomGame err(%+v)", err)
+		err = errorcode.ServiceError
+		return
+	}
+	if gameId == "" {
+		s.log.WithContext(ctx).Errorf("GetIdiom GetRoomGame gameId(%s) err(%+v)", gameId, err)
+		err = errorcode.GameNotFound
 		return
 	}
 	// 从redis中获取排行榜
 	res, err := s.repo.GetTopRanking(ctx, gameId, int64(req.Limit))
 	if err != nil {
 		s.log.WithContext(ctx).Errorf("GetRanking GetTopRanking err(%+v)", err)
+		err = errorcode.ServiceError
+		return
+	}
+	if res == nil {
+		s.log.WithContext(ctx).Errorf("GetRanking GetTopRanking res is nil")
+		err = errorcode.RankingNotFound
 		return
 	}
 	for _, r := range res {
@@ -52,7 +64,7 @@ func (s *Service) UpdateRanking(ctx context.Context, req *pb.UpdateRankingReq) (
 	resp = new(emptypb.Empty)
 	if req.GetGameId() == "" || req.Viewer == nil || req.Viewer.Uid == "" {
 		s.log.WithContext(ctx).Errorf("UpdateRanking req.GameId is nil, req(%+v)", req)
-		return nil, errors.BadRequest("Invalid parameters", "UpdateRanking")
+		return nil, errorcode.ParamInvalid
 	}
 	// 更新redis信息
 	viewer := &biz.ViewerRanking{
@@ -62,6 +74,7 @@ func (s *Service) UpdateRanking(ctx context.Context, req *pb.UpdateRankingReq) (
 	}
 	if err = s.repo.UpsertRanking(ctx, req.GetGameId(), viewer, _gameExpireTime); err != nil {
 		s.log.WithContext(ctx).Errorf("UpdateRanking UpsertRanking gameId(%d)|viewer(%+v) err(%+v)", req.GetGameId(), viewer, err)
+		err = errorcode.ServiceError
 		return
 	}
 	return
